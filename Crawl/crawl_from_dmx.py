@@ -115,3 +115,6 @@ for spec in specifications:
     else:
         line_filtered[spec] = line[spec]
 df.append(line_filtered, ignore_index=True)
+
+hi = [2, 3, 4]
+hi = [2, 3, 4]
