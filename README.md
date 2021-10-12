@@ -1,4 +1,4 @@
-# Sample GitLab Project
+# Phân tích và dự đoán giá laptop trên các website bán hàng ở Việt Nam
 
 This sample project shows how a project in GitLab looks for demonstration purposes. It contains issues, merge requests and Markdown files in many branches,
 named and filled with lorem ipsum.
