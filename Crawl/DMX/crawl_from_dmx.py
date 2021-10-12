@@ -1,4 +1,3 @@
-import time
 import json
 import jsonlines
 import pandas as pd
@@ -7,7 +6,7 @@ from selenium.webdriver import ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 
 class DienMayXanhScraper:
@@ -35,7 +34,7 @@ class DienMayXanhScraper:
         _chrome_options.add_argument("--disable-extensions")
         _chrome_options.add_argument("--incognito")
         _chrome_options.add_argument("--window-size=1920x1080")
-        driver = webdriver.Chrome(options=_chrome_options, executable_path="chromedriver.exe")
+        driver = webdriver.Chrome(options=_chrome_options, executable_path="Crawl/DMX/utils/chromedriver_dai.exe")
         return driver
 
     def _go_to_first_tab(self) -> None:
@@ -64,11 +63,13 @@ class DienMayXanhScraper:
             self._go_to_new_tab(link=link)
             try:
                 result = {}
+                name = self.driver.find_element_by_css_selector(".detail > h1").text
                 price = self.driver.find_element_by_class_name("box-price-present").text
+                result["Tên"] = name
                 result["Giá"] = price
 
                 self.driver.find_element_by_class_name("btn-short-spec").click()
-                WebDriverWait(self.driver, 10).until(
+                WebDriverWait(self.driver, 20).until(
                     EC.presence_of_element_located((By.CLASS_NAME, "parameter-all"))
                 )
                 specs = self.driver.find_element_by_class_name("parameter-all").find_elements_by_tag_name("li")
@@ -77,7 +78,7 @@ class DienMayXanhScraper:
                     info = spec.find_element_by_class_name("ctRight").text
                     result[name] = info
                 self._append_jsonl_file(result) if export else print(result)
-            except NoSuchElementException:
+            except NoSuchElementException or TimeoutException:
                 print("Sản phẫm lỗi")
                 self._log_errors(link)
 
@@ -90,37 +91,27 @@ bot = DienMayXanhScraper()
 bot.parse(export=True)
 
 # %%
-specifications = ["Giá",
-                  "Thương hiệu",
-                  "Cửa hàng",
-                  "Công nghệ CPU",
-                  "Số nhân",
-                  "Tốc độ CPU",
-                  "RAM",
-                  "Loại RAM",
-                  "Hỗ trợ RAM tối đa",
-                  "Ổ cứng",
-                  "Độ phân giải",
-                  "Tần số quét",
-                  "Công nghệ màn hình",
-                  "Card màn hình",
-                  "Webcam",
-                  "Đèn bàn phím",
-                  "Kích thước, trọng lượng",
-                  "Chất liệu",
-                  "Thông tin Pin",
-                  "Thời điểm ra mắt"]
+data = []
+with jsonlines.open("Crawl/DMX/raw/results.jsonl", "r") as f:
+    for line in f:
+        data.append(line)
+
+#%%
+max_num_specs = 0
+specifications = []
+for line in data:
+    if max_num_specs < len(line.keys()):
+        max_num_specs = len(line.keys())
+        specifications = list(line.keys())
 
 df = pd.DataFrame(columns=specifications)
+#%%
+for line in data:
+    line_filtered = {}
+    for spec in specifications:
+        if spec not in line.keys():
+            line_filtered[spec] = None
+        else:
+            line_filtered[spec] = line[spec]
+    df = df.append(line_filtered, ignore_index=True)
 
-with jsonlines.open("results.jsonl", "r") as f:
-    for line in f:
-        print(line)
-
-line_filtered = {}
-for spec in specifications:
-    if spec not in line.keys():
-        line_filtered[spec] = None
-    else:
-        line_filtered[spec] = line[spec]
-df.append(line_filtered, ignore_index=True)
