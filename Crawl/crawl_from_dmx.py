@@ -1,12 +1,13 @@
 import time
-from selenium import webdriver
 import json
 import jsonlines
 import pandas as pd
+from selenium import webdriver
+from selenium.webdriver import ChromeOptions
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
 
 
@@ -17,17 +18,26 @@ class DienMayXanhScraper:
     """
 
     def __init__(self):
-        self.driver = webdriver.Chrome(executable_path="chromedriver_dai.exe")
-        # self.driver.get("https://www.dienmayxanh.com/dien-thoai-apple-iphone/")
+        self.driver = self._load_driver()
         self.driver.get("https://www.dienmayxanh.com/laptop/")
         try:
             while True:
-                WebDriverWait(self.driver, 10).until(
-                    EC.presence_of_element_located((By.CLASS_NAME, "view-more"))
-                )
+                WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "view-more")))
                 self.driver.find_element_by_class_name("view-more").click()
-        except ElementNotInteractableException:
+        except:
             self.laptops = self.driver.find_elements_by_xpath('//*[@id="categoryPage"]/div[3]/ul/li/a[1]')
+
+    @staticmethod
+    def _load_driver():
+        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
+        _chrome_options = ChromeOptions()
+        _chrome_options.add_argument(f"user-agent={user_agent}")
+        # _chrome_options.add_argument("--headless")
+        _chrome_options.add_argument("--disable-extensions")
+        _chrome_options.add_argument("--incognito")
+        _chrome_options.add_argument("--window-size=1920x1080")
+        driver = webdriver.Chrome(options=_chrome_options, executable_path="chromedriver.exe")
+        return driver
 
     def _go_to_first_tab(self) -> None:
         self.driver.switch_to.window(self.driver.window_handles[0])
@@ -66,7 +76,6 @@ class DienMayXanhScraper:
                     name = spec.find_element_by_class_name("ctLeft").text[:-1]
                     info = spec.find_element_by_class_name("ctRight").text
                     result[name] = info
-                    # result = {"text": text, "rating": rating}
                 self._append_jsonl_file(result) if export else print(result)
             except NoSuchElementException:
                 print("Sản phẫm lỗi")
@@ -77,9 +86,10 @@ class DienMayXanhScraper:
 
 
 # %%
-bot = DienMayXanhScraper().parse(export=True)
+bot = DienMayXanhScraper()
+bot.parse(export=True)
 
-#%%
+# %%
 specifications = ["Giá",
                   "Thương hiệu",
                   "Cửa hàng",
@@ -107,7 +117,6 @@ with jsonlines.open("results.jsonl", "r") as f:
     for line in f:
         print(line)
 
-
 line_filtered = {}
 for spec in specifications:
     if spec not in line.keys():
@@ -115,6 +124,3 @@ for spec in specifications:
     else:
         line_filtered[spec] = line[spec]
 df.append(line_filtered, ignore_index=True)
-
-hi = [2, 3, 4]
-hi = [2, 3, 4]
