@@ -4,7 +4,6 @@ import jsonlines
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -59,7 +58,8 @@ class DienMayXanhScraper:
             f.write("\n")
 
     def parse(self, *args, export=False) -> None:
-        for phone in self.laptops:
+        for i, phone in enumerate(self.laptops):
+            print(f"Crawling {i + 1}/{len(self.laptops)}...")
             link = phone.get_attribute("href")
             self._go_to_new_tab(link=link)
             try:
