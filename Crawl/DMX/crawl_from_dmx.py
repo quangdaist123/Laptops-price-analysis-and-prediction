@@ -1,12 +1,12 @@
 import json
-import jsonlines
-import pandas as pd
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
+
+from Crawl.DMX.utils import convert
 
 
 class DienMayXanhScraper:
@@ -90,28 +90,9 @@ class DienMayXanhScraper:
 bot = DienMayXanhScraper()
 bot.parse(export=True)
 
-# %%
-data = []
-with jsonlines.open("Crawl/DMX/raw/results.jsonl", "r") as f:
-    for line in f:
-        data.append(line)
-
 #%%
-max_num_specs = 0
-specifications = []
-for line in data:
-    if max_num_specs < len(line.keys()):
-        max_num_specs = len(line.keys())
-        specifications = list(line.keys())
 
-df = pd.DataFrame(columns=specifications)
-#%%
-for line in data:
-    line_filtered = {}
-    for spec in specifications:
-        if spec not in line.keys():
-            line_filtered[spec] = None
-        else:
-            line_filtered[spec] = line[spec]
-    df = df.append(line_filtered, ignore_index=True)
-
+raw_data = convert.read_results("Crawl/DMX/raw/results.jsonl")
+max_columns = convert.get_spec_fields(raw_data)
+df = convert.make_frame(raw_data, max_columns)
+df.to_csv("hi.csv", index=False)
