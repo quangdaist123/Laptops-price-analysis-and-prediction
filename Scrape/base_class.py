@@ -20,7 +20,7 @@ class BaseScraper(ABC):
         _chrome_options.add_argument("--disable-extensions")
         _chrome_options.add_argument("--incognito")
         _chrome_options.add_argument("--window-size=1920x1080")
-        driver = webdriver.Chrome(options=_chrome_options, executable_path="Crawl/DMX/utils/chromedriver_dai.exe")
+        driver = webdriver.Chrome(options=_chrome_options, executable_path="Scrape/DMX/utils/chromedriver_dai.exe")
         return driver
 
     def _go_to_first_tab(self) -> None:

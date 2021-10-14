@@ -3,8 +3,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
-from Crawl.DMX.utils import convert
-from Crawl.base_class import BaseScraper
+from Scrape.DMX.utils import convert
+from Scrape.base_class import BaseScraper
 
 
 # %%
@@ -56,7 +56,7 @@ bot.parse(export=True)
 
 # %%
 
-raw_data = convert.read_results("Crawl/DMX/raw/results.jsonl")
+raw_data = convert.read_results("Scrape/DMX/raw/results.jsonl")
 max_columns = convert.get_spec_fields(raw_data)
 df = convert.make_frame(raw_data, max_columns)
 df.to_csv("raw_data_DMX_new.csv", index=False)
