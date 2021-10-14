@@ -1,3 +1,6 @@
+import os
+os.environ["PATH"] += "C:\\Users\\quang\\PycharmProjects\\laptops-price-analysis-and-prediction\\Scrape"
+
 import json
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
@@ -20,7 +23,7 @@ class BaseScraper(ABC):
         _chrome_options.add_argument("--disable-extensions")
         _chrome_options.add_argument("--incognito")
         _chrome_options.add_argument("--window-size=1920x1080")
-        driver = webdriver.Chrome(options=_chrome_options, executable_path="Scrape/DMX/utils/chromedriver_dai.exe")
+        driver = webdriver.Chrome(options=_chrome_options, executable_path="chromedriver_dai.exe")
         return driver
 
     def _go_to_first_tab(self) -> None:
@@ -31,14 +34,14 @@ class BaseScraper(ABC):
         self.driver.switch_to.window(self.driver.window_handles[1])
 
     @staticmethod
-    def _append_jsonl_file(data: dict) -> None:
-        with open("resultttttts.jsonl", "a+", encoding="utf8") as f:
+    def _append_jsonl_file(filename: str, data: dict) -> None:
+        with open(filename, "a+", encoding="utf8") as f:
             json.dump(data, f, ensure_ascii=False)
             f.write("\n")
 
     @staticmethod
-    def _log_errors(data: str) -> None:
-        with open("logggggggggg.txt", "a+", encoding="utf8") as f:
+    def _log_errors(filename: str, data: str) -> None:
+        with open(filename, "a+", encoding="utf8") as f:
             f.write(data)
             f.write("\n")
 
