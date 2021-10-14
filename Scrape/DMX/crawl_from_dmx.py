@@ -21,9 +21,9 @@ class DienMayXanhScraper(BaseScraper):
             self.laptops = self.driver.find_elements_by_xpath('//*[@id="categoryPage"]/div[3]/ul/li/a[1]')
 
     def parse(self, *args, export=False) -> None:
-        for i, phone in enumerate(self.laptops):
+        for i, laptop in enumerate(self.laptops):
             print(f"Crawling {i + 1}/{len(self.laptops)}...")
-            link = phone.get_attribute("href")
+            link = laptop.get_attribute("href")
             self._go_to_new_tab(link=link)
             try:
                 result = {}
