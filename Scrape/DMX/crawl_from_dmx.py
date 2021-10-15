@@ -41,7 +41,7 @@ class DienMayXanhScraper(BaseScraper):
                     name = spec.find_element_by_class_name("ctLeft").text[:-1]
                     info = spec.find_element_by_class_name("ctRight").text
                     result[name] = info
-                self._append_jsonl_file(result) if export else print(result)
+                self._append_jsonl_file("dmx_new.jsonl", result) if export else print(result)
             except NoSuchElementException or TimeoutException:
                 print("Sản phẫm lỗi")
                 self._log_errors(link)
