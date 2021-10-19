@@ -9,7 +9,7 @@ from Scrape.base_class import BaseScraper
 
 class FPTScraper(BaseScraper):
     def __init__(self):
-        super().__init__()
+        super(FPTScraper, self).__init__(driver_type="edge")
         self.driver.get("https://fptshop.com.vn/may-doi-tra/may-tinh-xach-tay-cu-gia-re")
         try:
             while True:
@@ -55,7 +55,7 @@ class FPTScraper(BaseScraper):
             self._go_to_first_tab()
         return specs_info
 
-    def _parse_every_used_laptop(self, sub_products, base_info):
+    def _parse_all_sub_laptops(self, sub_products, base_info):
         results = []
         for product in sub_products:
             try:
@@ -84,14 +84,14 @@ class FPTScraper(BaseScraper):
                 self._go_to_new_tab(link=laptop.find_element_by_tag_name("a").get_attribute("href"))
                 sub_products = self.driver.find_elements_by_css_selector(".mc-lprow>.mc-lpcol")
 
-                results = self._parse_every_used_laptop(sub_products, base_info)
+                results = self._parse_all_sub_laptops(sub_products, base_info)
                 for result in results:
                     if isinstance(result, dict):
                         self._append_jsonl_file("FPT_used.jsonl", result)
                     elif isinstance(result, str):
                         self._log_errors("FPT_used_log.txt", result)
             except BaseException as e:
-                raise (e)
+                print(e)
                 print("Lỗi sản phẩm")
 
 # %%
