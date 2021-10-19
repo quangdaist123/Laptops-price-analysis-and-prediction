@@ -2,7 +2,7 @@ from Scrape.base_class import BaseScraper
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+from Scrape import convert
 
 class TGDD_Scraper(BaseScraper):
     def __init__(self):
@@ -83,3 +83,11 @@ class TGDD_Scraper(BaseScraper):
 
 bot = TGDD_Scraper()
 bot.parse(export=True)
+
+#%%
+
+raw_data = convert.read_results("Scrape/results/TGDD_used.jsonl")
+max_columns = convert.get_spec_fields(raw_data)
+df = convert.make_frame(raw_data, max_columns)
+df.to_csv("raw_data_TGDD_used.csv", index=False)
+
