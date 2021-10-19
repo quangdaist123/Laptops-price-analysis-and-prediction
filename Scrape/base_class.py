@@ -23,15 +23,20 @@ class BaseScraper(ABC):
         _chrome_options.add_argument("--disable-extensions")
         _chrome_options.add_argument("--incognito")
         _chrome_options.add_argument("--window-size=1920x1080")
-        driver = webdriver.Chrome(options=_chrome_options, executable_path="chromedriver_dai.exe")
+        # driver = webdriver.Chrome(options=_chrome_options, executable_path="chromedriver_dai.exe")
+        driver = webdriver.Chrome(options=_chrome_options, executable_path="C:\\Users\\quang\\PycharmProjects\\laptops-price-analysis-and-prediction\\Scrape\\chromedriver_dai.exe")
         return driver
 
     def _go_to_first_tab(self) -> None:
         self.driver.switch_to.window(self.driver.window_handles[0])
 
+    def _go_to_last_tab(self) -> None:
+        self.driver.switch_to.window(self.driver.window_handles[-1])
+
     def _go_to_new_tab(self, *args, link=None) -> None:
-        self.driver.execute_script(f'''window.open("{link}","new_window");''')
-        self.driver.switch_to.window(self.driver.window_handles[1])
+        current_num_tabs = len(self.driver.window_handles)
+        self.driver.execute_script(f'window.open("{link}")')
+        self.driver.switch_to.window(self.driver.window_handles[current_num_tabs])
 
     @staticmethod
     def _append_jsonl_file(filename: str, data: dict) -> None:
