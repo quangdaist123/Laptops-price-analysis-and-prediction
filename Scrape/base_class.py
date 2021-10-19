@@ -3,18 +3,22 @@ os.environ["PATH"] += "C:\\Users\\quang\\PycharmProjects\\laptops-price-analysis
 
 import json
 from selenium import webdriver
-from selenium.webdriver import ChromeOptions
+from selenium.webdriver import ChromeOptions, Edge
+from msedge.selenium_tools import EdgeOptions
 
 from abc import ABC, abstractmethod
 
 
 class BaseScraper(ABC):
 
-    def __init__(self):
-        self.driver = self._load_driver()
+    def __init__(self, driver_type="Chrome"):
+        if driver_type.lower() == "chrome":
+            self.driver = self._load_Chrome_driver()
+        elif driver_type.lower() == "edge":
+            self.driver = self._load_Edge_driver()
 
     @staticmethod
-    def _load_driver():
+    def _load_Chrome_driver():
         user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " \
                      "Chrome/90.0.4430.93 Safari/537.36"
         _chrome_options = ChromeOptions()
@@ -25,6 +29,18 @@ class BaseScraper(ABC):
         _chrome_options.add_argument("--window-size=1920x1080")
         # driver = webdriver.Chrome(options=_chrome_options, executable_path="chromedriver_dai.exe")
         driver = webdriver.Chrome(options=_chrome_options, executable_path="C:\\Users\\quang\\PycharmProjects\\laptops-price-analysis-and-prediction\\Scrape\\chromedriver_dai.exe")
+        return driver
+
+    @staticmethod
+    def _load_Edge_driver():
+        # user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) " \
+        #              "Chrome/90.0.4430.93 Safari/537.36"
+        _edge_options = EdgeOptions()
+        # _edge_options.add_argument(f"user-agent={user_agent}")
+        # _edge_options.add_argument("--disable-extensions")
+        # _edge_options.add_argument("--incognito")
+        # _edge_options.add_argument("--window-size=1920x1080")
+        driver = webdriver.Edge(executable_path="C:\\Users\\quang\\PycharmProjects\\laptops-price-analysis-and-prediction\\msedgedriver.exe")
         return driver
 
     def _go_to_first_tab(self) -> None:
