@@ -81,5 +81,5 @@ class TGDD_Scraper(BaseScraper):
             self._go_to_first_tab()
 
 
-self = TGDD_Scraper()
-self.parse(export=True)
+bot = TGDD_Scraper()
+bot.parse(export=True)
