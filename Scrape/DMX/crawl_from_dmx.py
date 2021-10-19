@@ -3,7 +3,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
-from Scrape.DMX.utils import convert
+from Scrape import convert
 from Scrape.base_class import BaseScraper
 
 
@@ -41,10 +41,10 @@ class DienMayXanhScraper(BaseScraper):
                     name = spec.find_element_by_class_name("ctLeft").text[:-1]
                     info = spec.find_element_by_class_name("ctRight").text
                     result[name] = info
-                self._append_jsonl_file("dmx_new.jsonl", result) if export else print(result)
+                self._append_jsonl_file("DMX_new.jsonl", result) if export else print(result)
             except NoSuchElementException or TimeoutException:
                 print("Sản phẫm lỗi")
-                self._log_errors(link)
+                self._log_errors("DMX_new_log.txt", link)
 
             self._go_to_first_tab()
         self.driver.quit()
@@ -56,7 +56,7 @@ bot.parse(export=True)
 
 # %%
 
-raw_data = convert.read_results("Scrape/DMX/raw/results.jsonl")
+raw_data = convert.read_results("Scrape/DMX/log/DMX_new.jsonl")
 max_columns = convert.get_spec_fields(raw_data)
 df = convert.make_frame(raw_data, max_columns)
 df.to_csv("raw_data_DMX_new.csv", index=False)

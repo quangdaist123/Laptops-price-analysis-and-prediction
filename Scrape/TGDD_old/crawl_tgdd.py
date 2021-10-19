@@ -2,7 +2,6 @@ from Scrape.base_class import BaseScraper
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from Scrape.DMX.utils import convert
 
 
 class TGDD_Scraper(BaseScraper):
@@ -73,9 +72,9 @@ class TGDD_Scraper(BaseScraper):
                 results = self._parse_every_used_laptop(sub_products, base_info)
                 for result in results:
                     if isinstance(result, dict):
-                        self._append_jsonl_file("tgdd_used.jsonl", result)
+                        self._append_jsonl_file("TGDD_used.jsonl", result)
                     elif isinstance(result, str):
-                        self._log_errors("tgdd_log.txt", result)
+                        self._log_errors("TGDD_used_log.txt", result)
             except:
                 print("Lỗi load trang")
 
