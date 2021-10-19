@@ -86,7 +86,7 @@ bot.parse(export=True)
 
 #%%
 
-raw_data = convert.read_results("Scrape/results/TGDD_used.jsonl")
+raw_data = convert.read_results("Scrape/temp_results/TGDD_used.jsonl")
 max_columns = convert.get_spec_fields(raw_data)
 df = convert.make_frame(raw_data, max_columns)
 df.to_csv("raw_data_TGDD_used.csv", index=False)

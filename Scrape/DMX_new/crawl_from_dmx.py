@@ -56,7 +56,7 @@ bot.parse(export=True)
 
 # %%
 
-raw_data = convert.read_results("Scrape/DMX/log/DMX_new.jsonl")
+raw_data = convert.read_results("Scrape/DMX_new/log/DMX_new.jsonl")
 max_columns = convert.get_spec_fields(raw_data)
 df = convert.make_frame(raw_data, max_columns)
 df.to_csv("raw_data_DMX_new.csv", index=False)
