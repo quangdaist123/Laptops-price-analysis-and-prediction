@@ -55,6 +55,12 @@ def filter_non_laptops(df):
 
 
 # %%
+# THUẬNNNNNN
+df["brand"] = df["Tên"].apply(lambda s: preprocess_name(s))
+df["ram"] = df["Loại RAM"].apply(lambda s: preprocess_RAM(s))
+df["drive"] = df["Ổ cứng"].apply(lambda s: preprocess_drive(s))
+
+
 new_column = []
 for i, row in df.iterrows():
     new_column.append(preprocess_name(row["Tên"]))
@@ -109,3 +115,5 @@ for i, row in df.iterrows():
 
 df["Ổ cứng"] = new_column
 df["Ổ cứng"].value_counts()
+
+# %%
