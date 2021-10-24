@@ -60,7 +60,6 @@ df["brand"] = df["Tên"].apply(lambda s: preprocess_name(s))
 df["ram"] = df["Loại RAM"].apply(lambda s: preprocess_RAM(s))
 df["drive"] = df["Ổ cứng"].apply(lambda s: preprocess_drive(s))
 
-
 new_column = []
 for i, row in df.iterrows():
     new_column.append(preprocess_name(row["Tên"]))
@@ -116,4 +115,31 @@ for i, row in df.iterrows():
 df["Ổ cứng"] = new_column
 df["Ổ cứng"].value_counts()
 
+
+# %% Âm thanh
+
+def preprocess_audio_tech(raw_input):
+    auto_tech_types = ["DTS", "Realtek", "Nahimic", "Dolby", "Harman", "Stereo"]
+    # new_input = np.nan
+
+    if raw_input is not None and str(raw_input) != "nan":
+        raw_input = raw_input.replace("High Definition", "Realtek High Definition")
+        raw_input = raw_input.replace("High-definition", "Realtek High Definition")
+        for type in auto_tech_types:
+            if type.lower() in raw_input.lower():
+                return type
+        else:
+            raw_input = "Other"
+    return raw_input
+
+
 # %%
+
+for i, row in df.iterrows():
+    result = preprocess_audio_tech(row["Công nghệ âm thanh"])
+    print(i, result)
+
+# %%
+
+df["audio_tech"] = df["Công nghệ âm thanh"].apply(lambda x: preprocess_audio_tech(x))
+df["audio_tech"].value_counts()
