@@ -29,7 +29,7 @@ pd.set_option('display.max_colwidth', -1)
 
 def kichThuoc(_str):
     if not _str or str(_str) == "nan":
-        return np.nan
+        return [np.nan, np.nan, np.nan]
 
     sizes = re.findall("\\d*\\.?,?\\d+", _str)
     sizes = list(map(lambda x: float(x.replace(",", ".")), sizes))
