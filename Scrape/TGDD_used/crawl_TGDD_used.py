@@ -6,7 +6,7 @@ from Scrape import convert
 
 class TGDD_Scraper(BaseScraper):
     def __init__(self):
-        super(TGDD_Scraper, self).__init__()
+        super(TGDD_Scraper, self).__init__(driver_type="edge")
         self.driver.get("https://www.thegioididong.com/may-doi-tra/laptop?p=duoi-15-trieu&o=gia-cao-den-thap/")
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "dong")))
         self.driver.find_element_by_class_name("dong").click()
@@ -23,6 +23,7 @@ class TGDD_Scraper(BaseScraper):
         WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CLASS_NAME, "wrap_content")))
         WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CLASS_NAME, "viewparameterfull")))
         self.driver.find_element_by_class_name("viewparameterfull").click()
+        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".parameterfull > li[class]")))
         specs = self.driver.find_elements_by_css_selector(".parameterfull > li[class]")
         for spec in specs:
             name = spec.find_element_by_tag_name("span").text
@@ -86,7 +87,7 @@ bot.parse(export=True)
 
 #%%
 
-raw_data = convert.read_results("Scrape/temp_results/TGDD_used.jsonl")
+raw_data = convert.read_results("TGDD_used.jsonl")
 max_columns = convert.get_spec_fields(raw_data)
 df = convert.make_frame(raw_data, max_columns)
 df.to_csv("raw_data_TGDD_used.csv", index=False)
