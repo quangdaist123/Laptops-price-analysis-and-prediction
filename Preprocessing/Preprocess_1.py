@@ -1,10 +1,7 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy import stats
-from scipy.stats import f_oneway
-from math import ceil
+import string
+import re
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -12,7 +9,9 @@ pd.set_option('display.width', None)
 pd.set_option('display.max_colwidth', -1)
 
 # %%
-df = pd.read_csv("Raw dataset/raw_combined_csv_ver2.csv")
+df = pd.read_csv("Raw/raw_combined_csv_ver2.csv")
+df.columns
+
 
 
 # %%
@@ -120,11 +119,12 @@ df["Ổ cứng"].value_counts()
 
 def preprocess_audio_tech(raw_input):
     auto_tech_types = ["DTS", "Realtek", "Nahimic", "Dolby", "Harman", "Stereo"]
-    # new_input = np.nan
 
     if raw_input is not None and str(raw_input) != "nan":
+        # Format nhiều cách thể hiện => 1 kiểu duy nhất
         raw_input = raw_input.replace("High Definition", "Realtek High Definition")
         raw_input = raw_input.replace("High-definition", "Realtek High Definition")
+
         for type in auto_tech_types:
             if type.lower() in raw_input.lower():
                 return type
@@ -141,5 +141,65 @@ for i, row in df.iterrows():
 
 # %%
 
-df["audio_tech"] = df["Công nghệ âm thanh"].apply(lambda x: preprocess_audio_tech(x))
+df["audio_tech"] = df["Công nghệ âm thanh"].apply(lambda x: preprocess_audio_tech(x, shop))
 df["audio_tech"].value_counts()
+
+
+# %% Wifi
+
+def preprocess_wifi_tech(raw_input):
+    if raw_input is None or str(raw_input) == "nan":
+        return np.nan
+    else:
+        raw_input = raw_input.lower().replace(" ", "")
+        for punc in string.punctuation:
+            raw_input = raw_input.replace(punc, "")
+        # "ax" là chuẩn của Wi-Fi 6
+        if "wifi6" in raw_input or "ax" in raw_input:
+            raw_input = "Wi-Fi 6"
+        # "ac" là chuẩn của Wi-Fi 5
+        elif "wifi5" in raw_input or "ac" in raw_input:
+            raw_input = "Wi-Fi 5"
+        else:
+            raw_input = "Wi-Fi 5"
+    return raw_input
+
+
+# %%
+
+for i, row in df.iterrows():
+    result = preprocess_wifi_tech(row["WiFi"])
+    print(i, result)
+
+# %%
+
+df["wifi"] = df["WiFi"].apply(lambda x: preprocess_wifi_tech(x))
+df["wifi"].value_counts()
+
+
+# %% Wifi
+
+def preprocess_bluetooth_tech(raw_input):
+    if raw_input is None or str(raw_input) == "nan":
+        return np.nan
+    # Trích số thực
+    raw_input = re.findall("\\d*\\.?,?\\d+", raw_input)
+    if raw_input:  # Trích thành công
+        raw_input = raw_input[0]
+    else:
+        raw_input = np.nan
+    return raw_input
+
+
+# %%
+
+for i, row in df.iterrows():
+    result = preprocess_bluetooth_tech(row["Bluetooth"])
+    # print(i, result)
+
+# %%
+
+df["bluetooth"] = df["Bluetooth"].apply(lambda x: preprocess_bluetooth_tech(x))
+df["bluetooth"].value_counts()
+
+# %%
