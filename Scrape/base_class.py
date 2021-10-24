@@ -40,7 +40,7 @@ class BaseScraper(ABC):
         # _edge_options.add_argument("--disable-extensions")
         # _edge_options.add_argument("--incognito")
         # _edge_options.add_argument("--window-size=1920x1080")
-        driver = webdriver.Edge(executable_path="/Scrape/msedgedriver.exe")
+        driver = webdriver.Edge(executable_path="C:\\Users\quang\\PycharmProjects\\laptops-price-analysis-and-prediction\\Scrape\\msedgedriver.exe")
         return driver
 
     def _go_to_first_tab(self) -> None:
