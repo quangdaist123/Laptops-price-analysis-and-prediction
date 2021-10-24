@@ -11,36 +11,34 @@
 # str10 = '57 Wh' -> 57
 # str11 = 'Li-ion, 56 Wh' -> 56
 
+import numpy as np
+
 def thongTinPin(_str):
-  if not _str:
+  if not _str or str(_str) == "nan":
     return np.nan
   
-  _bien = np.nan
   _str = _str.lower()
   if 'wh' not in _str:
       return np.nan
-  
+
+  _str = _str.replace(',', '')
   _str = _str.replace('(','')
   _str = _str.replace(')','')
-  _str = _str.replace('whs','wh')
-  _str = _str.replace('whr','wh')
   _str = _str.replace('whrs','wh')
+  _str = _str.replace('whr','wh')
+  _str = _str.replace('whs','wh')
   _str = _str.replace('-watt-hour lithium-polymer','wh')
   _str = _str.replace('wh integrated','wh')
   _str = _str.replace('wh li-ion','wh')
-  
-  if ',' not in _str:
-    _str = _str.replace("wh"," wh")
-    chuoi_str = _str.split()
-    for i in chuoi_str:
-      if 'wh' in i:
-        return _ketqua
-      _ketqua = i
-  
-  elif ',' in _str:
-    chuoi_str = _str.split(',')
-    for i in chuoi_str:
-      if 'wh' in i:
-        _bien = i.replace(' ','')
-        
-  return _bien.replace('wh','')
+  _str = _str.replace(" wh", "wh")
+
+  splits = _str.split()
+  for split in splits:
+    if "wh" in split:
+      return split.replace("wh", "")
+
+  return _str
+
+#%%
+df["Pin"] = df["Thông tin Pin"].apply(lambda s: thongTinPin(s))
+df["Pin"].value_counts()
