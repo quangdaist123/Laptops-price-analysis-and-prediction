@@ -1,4 +1,10 @@
 import os
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+
 os.environ["PATH"] += "C:\\Users\\quang\\PycharmProjects\\laptops-price-analysis-and-prediction\\Scrape"
 
 import json
@@ -53,6 +59,23 @@ class BaseScraper(ABC):
         current_num_tabs = len(self.driver.window_handles)
         self.driver.execute_script(f'window.open("{link}")')
         self.driver.switch_to.window(self.driver.window_handles[current_num_tabs])
+
+    def _wait_to_be_visible(self, css_selector):
+        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, css_selector)))
+
+    def _wait_to_be_no_longer_visible(self, css_selector):
+        WebDriverWait(self.driver, 10).until_not(EC.visibility_of_element_located((By.CSS_SELECTOR, css_selector)))
+
+    def _wait_to_be_clickable(self, css_selector):
+        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector)))
+
+    def _wait_and_click(self, css_selector):
+        self._wait_to_be_clickable(css_selector)
+        self.driver.find_element_by_css_selector(css_selector).click()
+
+    def _wait_to_be_no_longer_clickable(self, css_selector):
+        WebDriverWait(self.driver, 10).until_not(EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector)))
+
 
     @staticmethod
     def _append_jsonl_file(filename: str, data: dict) -> None:
