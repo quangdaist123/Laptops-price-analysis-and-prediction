@@ -1,17 +1,19 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
 import re
 import string
 import numpy as np
 
 
-# In[ ]:
+def rename_columns(df, alternative_name, inplace=False):
+    """
+    Đổi tên các cột từ tiếng Việt sang tiếng Anh
+    """
+    return df.rename(columns=alternative_name, inplace=inplace)
 
 
 def preprocess_name(string_in):
+    """
+        Trích ra hãng sản xuất laptop
+    """
     brand_name = np.nan
     if string_in is not None:
         name_lowercased = string_in.lower()
@@ -30,9 +32,6 @@ def preprocess_name(string_in):
     return brand_name
 
 
-# In[ ]:
-
-
 def filter_non_laptops(df):
     df = df.copy()
     freq = dict(df["brand"].value_counts())
@@ -47,10 +46,11 @@ def filter_non_laptops(df):
     return df
 
 
-# In[ ]:
-
-
 def preprocess_ram_type(string_in):
+    """
+    Trích ra loại RAM
+    """
+
     types_of_RAM = ["LPDDR3", "DDR3L", "DDR3", "LPDDR4X", "DDR4"]
     ram_new = np.nan
     if string_in is None or str(string_in) == "nan":
@@ -64,25 +64,31 @@ def preprocess_ram_type(string_in):
     return ram_new
 
 
-# In[ ]:
-
-
 def preprocess_storage(string_in):
+    """
+        Trích ra dung lượng ổ cứng
+    """
     common_drive_capacity = ["128GB", "256GB", "512GB", "1TB"]
     new_drive = np.nan
     if string_in is not None and str(string_in) != "nan":
         drive_tight_uppercased = string_in.replace(" ", "").upper()
         for capacity in common_drive_capacity:
             if capacity in drive_tight_uppercased:
-                new_drive = capacity
+                if capacity != '1TB':
+                    new_drive = capacity
+                else:
+                    new_drive = '1024GB'
                 break
-    return new_drive
-
-
-# In[ ]:
+    if str(new_drive) == 'nan':
+        return new_drive
+    else:
+        return int(re.search('\d+', new_drive).group())
 
 
 def preprocess_os(string_in):
+    """
+        Trích ra tên hệ điều hành
+    """
     if string_in is None or str(string_in) == "nan":
         return np.nan
     else:
@@ -99,10 +105,11 @@ def preprocess_os(string_in):
             return np.nan
 
 
-# In[ ]:
-
-
 def preprocess_webcam(string_in):
+    """
+        Trích ra độ phân giải của webcam
+    """
+
     if string_in is None or str(string_in) == "nan":
         return np.nan
     else:
@@ -123,10 +130,10 @@ def preprocess_webcam(string_in):
             return np.nan
 
 
-# In[ ]:
-
-
 def preprocess_resolution(string_in):
+    """
+        Trích ra độ phân giải màn hình
+    """
     if not string_in:
         return np.nan
     else:
@@ -145,10 +152,11 @@ def preprocess_resolution(string_in):
         return f'{numbers[0]} x {numbers[1]}'
 
 
-# In[ ]:
-
-
 def preprocess_battery(string_in):
+    """
+        Trích ra dung lượng của pin, tính theo Whr
+    """
+
     if not string_in or str(string_in) == "nan":
         return np.nan
 
@@ -176,11 +184,19 @@ def preprocess_battery(string_in):
 
 
 def preprocessing_size_weight(string_in):
+    """
+        Trích ra khối lượng, chiều rộng, chiều dài, chiều cao của laptop
+    """
+
     if not string_in or str(string_in) == "nan":
         return [np.nan, np.nan, np.nan, np.nan]
 
+    string_in = string_in.replace(',', '.')
+
     # Chuyển đơn vị g (gram) lên kg (kilogram)
-    if "g" in string_in.split():
+    weight_part = string_in.split('-')[-1]
+    weight_part = float(re.findall("\\d*\\.?,?\\d+", weight_part)[0])
+    if weight_part > 500:  # Dấu hiệu của đơn vị gram
         g = float(string_in.split()[-2])
         kg = g / 1000
         string_in = string_in + str(kg)
@@ -194,6 +210,10 @@ def preprocessing_size_weight(string_in):
 
 
 def preprocess_thunderbolt(string_in):
+    """
+    Trích ra giá trị phân biệt giữa
+    laptop có cổng thunderbolt (1) và laptop không có cổng thunderbolt (0)
+    """
     if not string_in or str(string_in) == "nan":
         return np.nan
     else:
@@ -206,6 +226,10 @@ def preprocess_thunderbolt(string_in):
 
 
 def preprocess_antiglare(string_in):
+    """
+    Trích ra giá trị phân biệt giữa
+    laptop có chống chói (1) và laptop không có chống chói (0)
+    """
     if not string_in or str(string_in) == "nan":
         return np.nan
     else:
@@ -217,7 +241,10 @@ def preprocess_antiglare(string_in):
             return 0  # Không -> trả về 0
 
 
-def preprocess_cpu(string_in):
+def preprocess_cpu_type(string_in):
+    """
+        Trích ra công nghệ CPU
+    """
     if not string_in or str(string_in) == "nan":
         return np.nan
     else:
@@ -255,7 +282,33 @@ def preprocess_cpu(string_in):
             return np.nan
 
 
-def preprocess_gpu(string_in):
+def preprocess_cpu_speed(string_in):
+    if string_in is None or str(string_in) == 'nan':  # None hoặc nan -> np.nan
+        return np.nan
+
+    output = re.findall("\\d*\\.?,?\\d+", string_in)  # trả về list chỉ chứa số
+    output = [x.replace(",", ".") for x in output]  # thay dấu , = .
+    output = list(map(lambda x: float(x), output))  # ép kiểu các số trong list -> float
+    output = output[0]  # lấy phần tử đầu tiên của list vì list chỉ có 1 phần tử
+
+    return output
+
+
+def preprocess_max_cpu_speed(string_in):
+    if string_in is None or str(string_in) == "nan":
+        return np.nan
+    output = re.findall("\\d*\\.?,?\\d+", string_in)
+    output = [x.replace(",", ".") for x in output]
+    output = list(map(lambda x: float(x), output))
+    output = output[0]
+
+    return output
+
+
+def preprocess_gpu_type(string_in):
+    """
+        Trích ra tên GPU (Card đồ họa)
+    """
     if not string_in or str(string_in) == "nan":
         return np.nan
     else:
@@ -285,11 +338,13 @@ def preprocess_gpu(string_in):
         elif 'microsoft' in string_in:
             return 'Microsoft'
         else:
-            # print(string_in)
             return np.nan
 
 
 def preprocess_audio_tech(string_in):
+    """
+        Trích ra công nghệ âm thanh
+    """
     auto_tech_types = ["DTS", "Realtek", "Nahimic", "Dolby", "Harman", "Stereo", "TrueHarmony", "SonicMaster",
                        "Bang & Olufsen", "Smart AMP", "Waves MaxxAudio",
                        "HP Audio Boost"]
@@ -307,44 +362,10 @@ def preprocess_audio_tech(string_in):
     return string_in
 
 
-def preprocess_RAM_tiki(string_in):
-    if not string_in['RAM'] or str(string_in['RAM']) == "nan":
-        return np.nan, np.nan, np.nan
-    else:
-        # Lấy dung lượng RAM
-        string_in['RAM'] = string_in['RAM'].strip()
-
-        if string_in['RAM'][:2].isdigit():
-            ram_capacity = string_in['RAM'][:2]
-        else:
-            ram_capacity = string_in['RAM'][0]
-
-        # Lấy loại RAM
-        types_of_RAM = ["LPDDR4X", "DDR4"]
-        ram_type = np.nan
-        for type in types_of_RAM:
-            if type in string_in['RAM']:
-                ram_type = type
-                break
-
-        # Lấy bus RAM
-        string_in['RAM'] = string_in['RAM'].lower()
-        bus = re.match(r'\d+\ ?mhz', string_in['RAM'])
-        if bus:
-            bus = int(bus.replace('mhz', ''))
-        else:
-            bus = np.nan
-        # đk
-        if (str(string_in['Loại RAM']) != 'nan') and (str(ram_type) == 'nan'):
-            ram_type = string_in['Loại RAM']
-
-        if str(string_in['Tốc độ Bus RAM']) != 'nan' and str(bus) == 'nan':
-            bus = string_in['Tốc độ Bus RAM']
-
-    return (ram_capacity, ram_type, bus)
-
-
 def preprocess_ram_speed(string_in):
+    """
+        Trích ra tốc độ RAM
+    """
     if not string_in or str(string_in) == "nan":
         return np.nan
 
@@ -358,6 +379,9 @@ def preprocess_ram_speed(string_in):
 
 
 def preprocess_wifi_tech(string_in):
+    """
+        Trích ra chuẩn Wi-fi
+    """
     if string_in is None or str(string_in) == "nan":
         return np.nan
     else:
@@ -376,13 +400,16 @@ def preprocess_wifi_tech(string_in):
 
 
 def preprocess_bluetooth_tech(string_in):
+    """
+        Trích ra chuẩn Wi-fi
+    """
     if string_in is None or str(string_in) == "nan":
         return np.nan
     # Trích số thực
     string_in = re.findall("\\d*\\.?,?\\d+", string_in)
     string_in = sorted(string_in)
     if string_in:  # Trích thành công
-        # Xử lí trường hợp chỉ trích được ra loại wifi
+        # Xử lí trường hợp chỉ trích được ra loại wifi, không có thông tin Bluetooth
         if str(string_in[0]) == "802.11":
             string_in = np.nan
         else:
@@ -391,6 +418,10 @@ def preprocess_bluetooth_tech(string_in):
 
 
 def preprocess_wireless(string_in):
+    """
+        Trích ra chuẩn Bluetooth và chuẩn Wi-fi
+    """
+
     bluetooth = preprocess_bluetooth_tech(string_in)
     wifi = preprocess_wifi_tech(string_in)
 
@@ -398,12 +429,15 @@ def preprocess_wireless(string_in):
 
 
 def preprocess_lightning(string_in):
+    """
+    Trích ra giá trị phân biệt giữa
+    laptop có đèn bàn phím (1) và laptop không có đèn bàn phím (0)
+    """
     # Kiểm tra giá trị trong ô trước khi bắt đầu xử lí
     if string_in is None or str(string_in) == "nan":
         return np.nan
 
     # Cột has_lightning chỉ có 3 giá trị: 'Có', 'Không có đèn' và nan
-
     # Có đèn thì return 1, không có đèn return 0
     if len(string_in) == 2:
         return 1
@@ -412,6 +446,9 @@ def preprocess_lightning(string_in):
 
 
 def preprocess_new_warranty(string_in):
+    """
+    Trích ra thời gian bảo hành mới của laptop, tính theo tháng
+    """
     # Kiểm tra giá trị trong ô trước khi bắt đầu xử lí
     if string_in is None or str(string_in) == "nan":
         return np.nan
@@ -420,6 +457,9 @@ def preprocess_new_warranty(string_in):
 
 
 def preprocess_material(string_in):
+    """
+    Trích ra chất liệu laptop
+    """
     # Kiểm tra giá trị trong ô trước khi bắt đầu xử lí
     if string_in is None or str(string_in) == "nan":
         return np.nan
@@ -435,32 +475,6 @@ def preprocess_material(string_in):
         return 'Kim loại'
 
 
-# Xử lý Cpu_speed
-def preprocess_cpu_speed(string_in):
-    if string_in is None or str(string_in) == 'nan':  # None hoặc nan -> np.nan
-        return np.nan
-
-    output = re.findall("\\d*\\.?,?\\d+", string_in)  # trả về list chỉ chứa số
-    output = [x.replace(",", ".") for x in output]  # thay dấu , = .
-    output = list(map(lambda x: float(x), output))  # ép kiểu các số trong list -> float
-    output = output[0]  # lấy phần tử đầu tiên của list vì list chỉ có 1 phần tử
-
-    return output
-
-
-# Xử lý Max_Cpu_Speed
-def preprocess_max_cpu_speed(string_in):
-    if string_in is None or str(string_in) == "nan":
-        return np.nan
-    output = re.findall("\\d*\\.?,?\\d+", string_in)
-    output = [x.replace(",", ".") for x in output]
-    output = list(map(lambda x: float(x), output))
-    output = output[0]
-
-    return output
-
-
-# Xử lý Ram
 def preprocess_ram(string_in):
     if string_in is None or str(string_in) == "nan":
         return np.nan
@@ -472,7 +486,6 @@ def preprocess_ram(string_in):
     return output
 
 
-# Xử lý Max_ram
 def preprocess_max_ram(string_in):
     if string_in is None or str(string_in) == "nan":
         return np.nan
@@ -497,7 +510,7 @@ def preprocess_new_price(string_in):
     output = [x.replace(".", "") for x in output]
     output = list(map(lambda x: float(x), output))
 
-    # Xử lí trường hợp chỉ có thông số bluetooth hoặc wifi
+    # Xử lí trường hợp máy đã ngừng kinh doanh, không có giá
     if len(output) == 0:
         return np.nan
     else:
@@ -505,6 +518,9 @@ def preprocess_new_price(string_in):
 
 
 def preprocess_used_warranty(string_in):
+    """
+        Trích ra thời gian bảo hành cũ của laptop, tính theo tháng
+    """
     if string_in is None or str(string_in) == "nan":
         return np.nan
     # Trích số thực
@@ -513,8 +529,101 @@ def preprocess_used_warranty(string_in):
     # print(output)
     output = list(map(lambda x: float(x), output))
 
-    # Xử lí trường hợp chỉ có thông số bluetooth hoặc wifi
+    # Xử lí trường hợp không có thời gian bảo hành còn lại
     if len(output) == 0:
         return np.nan
     else:
         return output[0]
+
+
+def preprocess_savings(string_in):
+    """
+    Trích ra phần trăm tiết kiệm và lượng tiền tiết kiệm khi mua máy cữ
+    """
+
+    if string_in is None or str(string_in) == "nan":
+        return (np.nan, np.nan)
+    # Trích số thực
+    output = re.findall("\\d*\\.?\\d+\\.?\d+", string_in)
+    output = [x.replace(".", "") for x in output]
+    output = list(map(lambda x: float(x), output))
+    output = sorted(output)
+
+    # Xử lí trường hợp chỉ có 1 trong 2 thuộc tính
+    if len(output) == 1:
+        if output[0] < 100:
+            output = (output[0], np.nan)
+        else:
+            output = (np.nan, output[0])
+    else:
+        output = tuple(output)
+    return output
+
+
+def preprocess_has_touchscreen(string_in):
+    """
+    Trích ra giá trị phân biệt giữa
+    laptop có hỗ trợ cảm ứng (1) và laptop không có hỗ trợ cảm ứng (0)
+    """
+
+    if string_in is None or str(string_in) == "nan":
+        return 0
+    else:
+        return 1
+
+
+def preprocess_sd_slot(string_in):
+    """
+    Trích ra số lượng các loại khe cảm thẻ nhớ được hỗ trợ
+    """
+
+    if string_in is None or str(string_in) == "nan":
+        return 0
+    else:
+        return len(string_in.split('\n'))
+
+
+def preprocess_screen_size(string_in):
+    """
+    Trích ra kích thước của màn hình laptop, tính theo inch
+    """
+    if string_in is None or str(string_in) == "nan":
+        return np.nan
+
+    # Trích số thực
+    output = re.findall("\\d*\\.?,?\\d+", string_in)
+    output = [x.replace(",", ".") for x in output]
+    # print(output)
+    output = list(map(lambda x: float(x), output))
+    if len(output) == 0:
+        return np.nan
+    else:
+        return output[0]
+
+
+def preprocess_others(string_in):
+    """
+    Trích ra các tính năng đặc biệt của laptop
+    """
+    if string_in is None or str(string_in) == "nan":
+        return 0, 0, 0, 0
+
+    string_in = string_in.lower()
+
+    fingerprint = 0
+    if 'vân tay' in string_in:
+        fingerprint = 1
+
+    camera_lock = 0
+    if 'khóa camera' in string_in:
+        camera_lock = 1
+
+    _180deg = 0
+    if '180' in string_in:
+        _180deg = 1
+
+    faceID = 0
+    if 'khuôn mặt' in string_in:
+        faceID = 1
+
+    return fingerprint, camera_lock, _180deg, faceID
