@@ -2,6 +2,53 @@ import re
 import string
 import numpy as np
 
+alternative_names = \
+    {'Bảo hành cũ': 'used_warranty',
+     'Giá máy cũ': 'used_price',
+     'Tên': 'name',
+     'Giá máy mới': "new_price",
+     'Bảo hành mới': "new_warranty",
+     'Tiết kiệm': "savings",
+     'Công nghệ CPU': 'cpu_type',
+     'Số nhân': 'num_core',
+     'Số luồng': 'num_thread',
+     'Tốc độ CPU': "cpu_speed",
+     'Tốc độ tối đa': "max_cpu_speed",
+     'Bộ nhớ đệm': "cached_cpu",
+     'RAM': 'ram',
+     'Loại RAM': 'ram_type',
+     'Tốc độ Bus RAM': 'ram_speed',
+     'Hỗ trợ RAM tối đa': 'max_ram',
+     'Ổ cứng': 'storage',
+     'Màn hình': 'screen_size',
+     'Độ phân giải': 'resolution',
+     'Tần số quét': "scan_frequency",
+     'Công nghệ màn hình': 'screen_tech',
+     'Màn hình cảm ứng': 'has_touchscreen',
+     'Card màn hình': 'gpu_type',
+     'Công nghệ âm thanh': 'audio_tech',
+     'Cổng giao tiếp': 'ports',
+     'Kết nối không dây': 'wireless',
+     'Khe đọc thẻ nhớ': 'sd_slot',
+     'Webcam': 'webcam',
+     'Tính năng khác': 'others',
+     'Đèn bàn phím': 'has_lightning',
+     'Kích thước, trọng lượng': 'size_weight',
+     'Chất liệu': 'material',
+     'Thông tin Pin': 'battery',
+     'Hệ điều hành': 'os',
+     'Thời điểm ra mắt': 'released'
+     }
+
+ordered_columns = \
+    ['brand', 'cpu_type', 'cpu_speed', 'max_cpu_speed', 'num_core', 'num_thread', 'cached_cpu',
+     'gpu_type', 'ram_type', 'ram', 'max_ram', 'ram_speed', 'storage',
+     'screen_size', 'resolution', 'scan_frequency', 'webcam', 'num_sd_slot', 'material', 'battery', 'os',
+     'audio_tech', 'bluetooth_tech', 'wifi_tech', 'weight', 'thickness', 'width', 'length', 'released',
+     'has_lightning', 'has_thundebolt', 'has_touchscreen', 'has_fingerprint', 'has_camera_lock', 'has_180_degree',
+     'has_face_id', 'has_antiglare',
+     'saved_percent', 'saved_money', 'new_warranty', 'used_warranty', 'new_price', 'used_price']
+
 
 def rename_columns(df, alternative_name, inplace=False):
     """
@@ -9,6 +56,13 @@ def rename_columns(df, alternative_name, inplace=False):
     """
     return df.rename(columns=alternative_name, inplace=inplace)
 
+
+def remove_duplicate_laptops(df):
+    df = df.groupby("name", as_index=False).first()
+    return df
+
+
+############# PREPROCESS FEATURES #############
 
 def preprocess_name(string_in):
     """
@@ -30,20 +84,6 @@ def preprocess_name(string_in):
         if str(brand_name) != "nan" and brand_name not in ["HP", "MSI", "LG"]:
             brand_name = brand_name.capitalize()
     return brand_name
-
-
-def filter_non_laptops(df):
-    df = df.copy()
-    freq = dict(df["brand"].value_counts())
-    new_column = []
-    for i, row in df.iterrows():
-        if str(row["brand"]) != "nan" and freq[row["brand"]] == 1:
-            new_column.append(np.nan)
-        else:
-            new_column.append(row["brand"])
-    df["brand"] = new_column
-    df.dropna(subset=['brand'], inplace=True)
-    return df
 
 
 def preprocess_ram_type(string_in):
@@ -305,6 +345,24 @@ def preprocess_max_cpu_speed(string_in):
     return output
 
 
+def preprocess_cached_cpu(string_in):
+    """
+    Trích ra dung lượng bộ nhớ đệm trong CPU
+    """
+    if string_in is None or str(string_in) == "nan":
+        return np.nan
+
+    # Trích số thực
+    output = re.findall("\\d*\\.?,?\\d+", string_in)
+    output = [x.replace(",", ".") for x in output]
+    # print(output)
+    output = list(map(lambda x: float(x), output))
+    if len(output) == 0:
+        return np.nan
+    else:
+        return output[0]
+
+
 def preprocess_gpu_type(string_in):
     """
         Trích ra tên GPU (Card đồ họa)
@@ -428,7 +486,7 @@ def preprocess_wireless(string_in):
     return bluetooth, wifi
 
 
-def preprocess_lightning(string_in):
+def preprocess_has_lightning(string_in):
     """
     Trích ra giá trị phân biệt giữa
     laptop có đèn bàn phím (1) và laptop không có đèn bàn phím (0)
@@ -511,6 +569,21 @@ def preprocess_new_price(string_in):
     output = list(map(lambda x: float(x), output))
 
     # Xử lí trường hợp máy đã ngừng kinh doanh, không có giá
+    if len(output) == 0:
+        return np.nan
+    else:
+        return output[0]
+
+
+def preprocess_used_price(string_in):
+    if string_in is None or str(string_in) == "nan":
+        return np.nan
+    # Trích số thực
+    output = re.findall("\\d*\\.?\\d+\\.?\d+", string_in)
+    output = [x.replace(".", "") for x in output]
+    output = list(map(lambda x: float(x), output))
+
+    # Xử lí trường hợp không có giá
     if len(output) == 0:
         return np.nan
     else:
