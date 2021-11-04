@@ -3,8 +3,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
-from Scrape import convert
-from Scrape.base_class import BaseScraper
+from Scrape.utils import convert
+from Scrape.utils.base_class import BaseScraper
 
 
 # %%
