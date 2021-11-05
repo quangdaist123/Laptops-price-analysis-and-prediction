@@ -4,12 +4,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-
-os.environ["PATH"] += "C:\\Users\\quang\\PycharmProjects\\laptops-price-analysis-and-prediction\\Scrape"
+os.environ["PATH"] += "C:\\Users\\quang\\PycharmProjects\\laptops-price-analysis-and-prediction"
 
 import json
 from selenium import webdriver
-from selenium.webdriver import ChromeOptions, Edge
+from selenium.webdriver import ChromeOptions
 from msedge.selenium_tools import EdgeOptions
 
 from abc import ABC, abstractmethod
@@ -34,7 +33,7 @@ class BaseScraper(ABC):
         _chrome_options.add_argument("--incognito")
         _chrome_options.add_argument("--window-size=1920x1080")
         # driver = webdriver.Chrome(options=_chrome_options, executable_path="chromedriver.exe")
-        driver = webdriver.Chrome(options=_chrome_options, executable_path="/Scrape/chromedriver.exe")
+        driver = webdriver.Chrome(options=_chrome_options, executable_path="/Scrape/utils/chromedriver.exe")
         return driver
 
     @staticmethod
@@ -46,7 +45,7 @@ class BaseScraper(ABC):
         # _edge_options.add_argument("--disable-extensions")
         # _edge_options.add_argument("--incognito")
         # _edge_options.add_argument("--window-size=1920x1080")
-        driver = webdriver.Edge(executable_path="/Scrape/utils/msedgedriver.exe")
+        driver = webdriver.Edge(executable_path="C:\\Users\\quang\\PycharmProjects\\laptops-price-analysis-and-prediction\\Scrape\\utils\\msedgedriver.exe")
         return driver
 
     def _go_to_first_tab(self) -> None:
@@ -75,7 +74,6 @@ class BaseScraper(ABC):
 
     def _wait_to_be_no_longer_clickable(self, css_selector):
         WebDriverWait(self.driver, 10).until_not(EC.element_to_be_clickable((By.CSS_SELECTOR, css_selector)))
-
 
     @staticmethod
     def _append_jsonl_file(filename: str, data: dict) -> None:
