@@ -42,9 +42,10 @@ df['has_thundebolt'] = df['ports'].apply(lambda s: preprocess_thunderbolt(s))
 df['has_antiglare'] = df['screen_tech'].apply(lambda s: preprocess_antiglare(s))
 df['has_touchscreen'] = df['has_touchscreen'].apply(lambda s: preprocess_has_touchscreen(s))
 df['screen_size'] = df['screen_size'].apply(lambda s: preprocess_screen_size(s))
-df['num_sd_slot'] = df['sd_slot'].apply(lambda s: preprocess_sd_slot(s))
 df["webcam"] = df["webcam"].apply(lambda s: preprocess_webcam(s))
 df["battery"] = df["battery"].apply(lambda s: preprocess_battery(s))
+
+df['num_sd_slot'] = df['sd_slot'].apply(lambda s: preprocess_sd_slot(s))
 
 #### Tách thuộc tính wireless
 df["bluetooth_tech"] = df["wireless"].apply(lambda s: preprocess_wireless(s)[0])
@@ -74,6 +75,16 @@ df.drop(columns=old_columns, inplace=True)
 
 # Reoder columns
 df = df[ordered_columns]
+
+# # %%
+# for i, row in df.iterrows():
+#     if str((row['has_lightning'])) == 'nan':
+#         print(i, row['name'])
+#         # print(i, row['webcam'])
+#         # print(i, preprocessing_size_weight(row['size_weight']))
+#
+# #%%
+# df['webcam'].apply(preprocess_webcam)
 
 # %%
 df.to_csv("Dataset/Tidy/1_dataset_renamed_preprocessed_dropped.csv", index=False)

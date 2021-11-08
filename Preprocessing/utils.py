@@ -156,14 +156,21 @@ def preprocess_webcam(string_in):
         string_in = string_in.lower().replace(',', '')
         substrings = string_in.split()
 
-        # Nếu có 'vga' hoặc chỉ có 'webcam' -> 'VGA'
-        if 'vga' in substrings or len(substrings) == 1:
+        # Nếu có là 'vga', 'webcam', '0.3mp', '1mp' -> 'VGA'
+        if 'vga' in substrings or \
+                len(substrings) == 1 or \
+                '0.3 mp' in string_in or \
+                '1 mp' in string_in:
             return 'VGA'
         # Nếu có 'fhd' -> 'FHD'
         elif 'fhd' in substrings:
             return 'FHD'
-        # Nếu có '720p' hoặc 'hd' -> 'HD'
-        elif 'hd' in substrings or '720p' in substrings:
+        # Nếu có '720p', 'hd', '5mp', 'IR', 'Webcam Stereo 3D' -> 'HD'
+        elif 'hd' in substrings or \
+                '720p' in substrings or \
+                '5 mp' in string_in or \
+                'IR'.lower() in string_in or \
+                'Webcam Stereo 3D'.lower() in string_in:
             return 'HD'
             # Các trường hợp còn lại -> np.nan
         else:
@@ -225,13 +232,21 @@ def preprocess_battery(string_in):
 
 def preprocessing_size_weight(string_in):
     """
-        Trích ra khối lượng, chiều rộng, chiều dài, chiều cao của laptop
+        Trích ra khối lượng, chiều dày, chiều rộng, chiều dài của laptop
     """
 
     if not string_in or str(string_in) == "nan":
         return [np.nan, np.nan, np.nan, np.nan]
-
     string_in = string_in.replace(',', '.')
+
+    # Xử lí trường hợp có 2 giá trị về chiều dày của Laptop apple)
+    # 'Dài 304.1 mm - Rộng 212.4 mm - Dày 4.1 mm đến 16.1 mm - Nặng 1.29 kg'
+    # => Lấy độ dày dày nhất
+    string_in = string_in.replace('Dày 4.1', '')
+
+    # Xử lí trường hợp gõ nhầm giá trị chiều rộng của máy Asus VivoBook S530F i5 8265U/8GB+16GB/1TB/Win10 (BQ400T)
+    # 'Rộng 143 mm' = > 'Rộng 243 mm' (Đã kiểm tra lại)
+    string_in = string_in.replace('Rộng 143 mm', 'Rộng 243 mm')
 
     # Chuyển đơn vị g (gram) lên kg (kilogram)
     weight_part = string_in.split('-')[-1]
@@ -246,6 +261,12 @@ def preprocessing_size_weight(string_in):
     sizes = list(map(lambda x: float(x), sizes))
     sizes = sorted(sizes)[:4]
     sizes = sizes + [np.nan] * (4 - len(sizes))
+
+    # Chuyển xử lí trường hợp lỗi đánh máy chiều dày laptop từ 20mm lên 200mm (20cm)
+    thickness_part = sizes[1]
+    if thickness_part > 100:
+        sizes[1] = thickness_part / 10
+
     return sizes
 
 
@@ -492,8 +513,10 @@ def preprocess_has_lightning(string_in):
     laptop có đèn bàn phím (1) và laptop không có đèn bàn phím (0)
     """
     # Kiểm tra giá trị trong ô trước khi bắt đầu xử lí
+    # 2 trường hợp nan duy nhât trong bộ dữ liệu là Apple Macbook Air 2015
+    # sản phẩm này có hỗ trợ đèn bàn phím => điền 1
     if string_in is None or str(string_in) == "nan":
-        return np.nan
+        return 1
 
     # Cột has_lightning chỉ có 3 giá trị: 'Có', 'Không có đèn' và nan
     # Có đèn thì return 1, không có đèn return 0
