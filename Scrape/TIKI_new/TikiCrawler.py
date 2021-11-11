@@ -131,4 +131,3 @@ for url in product_urls:
 
 
 df.to_excel('laptop.csv', encoding='UTF-8', index=False)
-
