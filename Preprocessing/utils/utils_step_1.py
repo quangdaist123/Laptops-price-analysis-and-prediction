@@ -62,6 +62,29 @@ def remove_duplicate_laptops(df):
     return df
 
 
+def correct_dtypes(df):
+    df['cpu_speed'] = df['cpu_speed'].astype('object')
+    df['max_cpu_speed'] = df['max_cpu_speed'].astype('object')
+    df['ram'] = df['ram'].astype('object')
+    df['ram_speed'] = df['ram_speed'].astype('object')
+    df['storage'] = df['storage'].astype('object')
+    df['screen_size'] = df['screen_size'].astype('object')
+    df['num_sd_slot'] = df['num_sd_slot'].astype('object')
+    df['bluetooth_tech'] = df['bluetooth_tech'].astype('object')
+    df['released'] = df['released'].astype('object')
+    df['has_lightning'] = df['has_lightning'].astype('object')
+    df['has_thundebolt'] = df['has_thundebolt'].astype('object')
+    df['has_touchscreen'] = df['has_touchscreen'].astype('object')
+    df['has_fingerprint'] = df['has_fingerprint'].astype('object')
+    df['has_camera_lock'] = df['has_camera_lock'].astype('object')
+    df['has_180_degree'] = df['has_180_degree'].astype('object')
+    df['has_face_id'] = df['has_face_id'].astype('object')
+    df['has_antiglare'] = df['has_antiglare'].astype('object')
+    df['new_warranty'] = df['new_warranty'].astype('object')
+    df['used_warranty'] = df['used_warranty'].astype('object')
+    return df
+
+
 ############# PREPROCESS FEATURES #############
 
 def preprocess_name(string_in):
@@ -723,3 +746,45 @@ def preprocess_others(string_in):
         faceID = 1
 
     return fingerprint, camera_lock, _180deg, faceID
+
+
+def preprocess_scan_frequency(string_in):
+    """
+    Trích ra tần số quét của màn hình
+    """
+    if string_in is None or str(string_in) == "nan":
+        return np.nan
+
+    # Trích số thực
+    output = re.findall("\\d*\\.?,?\\d+", string_in)
+    output = [x.replace(",", ".") for x in output]
+    # print(output)
+    output = list(map(lambda x: float(x), output))
+    if len(output) == 0:
+        return np.nan
+    else:
+        return output[0]
+
+# #%%
+# def preprocess_cpu_speed(string_in):
+#     if string_in is None or str(string_in) == 'nan':  # None hoặc nan -> np.nan
+#         return np.nan
+#
+#     output = string_in
+#     # output = re.findall("\\d*\\.?,?\\d+", string_in)  # trả về list chỉ chứa số
+#     # output = [x.replace(",", ".") for x in output]  # thay dấu , = .
+#     # output = list(map(lambda x: float(x), output))  # ép kiểu các số trong list -> float
+#     # output = output[0]  # lấy phần tử đầu tiên của list vì list chỉ có 1 phần tử
+#
+#     if 1 <= output < 1.5:
+#         return "[1, 1.5) GHz"
+#     elif 1.5 <= output < 2:
+#         return "[1.5, 2) GHz"
+#     elif 2 <= output < 2.5:
+#         return "[2, 2.5) GHz"
+#     elif 2.5 <= output < 3:
+#         return "[2.5, 3) GHz"
+#     else:
+#         return "[3, inf) GHz"
+#
+#     return output
