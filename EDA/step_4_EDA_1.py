@@ -7,8 +7,6 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from Preprocessing.utils.utils_step_1 import correct_dtypes
 
-# %%
-
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
@@ -17,8 +15,8 @@ pd.options.display.max_rows
 
 # %%
 
-df = pd.read_csv('Dataset/Tidy/3_dataset_feature_added.csv')
-df = correct_dtypes(df)
+df = pd.read_csv('Dataset/Tidy/4_dataset_reprocessed.csv')
+df = correct_dtypes(df, after_step='5')
 quanti_cols = df.select_dtypes(include='number').columns
 quali_df = df.select_dtypes(include='object')
 quali_cols = quali_df.columns
@@ -134,7 +132,7 @@ for column in quali_df:
 
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f'EDA/plots results/continuous/pie_chart/{column}.png', bbox_inches='tight')
+    plt.savefig(f'EDA/plots results/categorical/pie_chart/{column}.png', bbox_inches='tight')
     plt.clf()
 
 # %% md
@@ -193,8 +191,8 @@ for column in quali_cols:
     ax = plt.title(f'used_price vs {column}\n(p_value one-way ANOVA: {p_value:.2e})')
 
     plt.tight_layout()
-    plt.show()
-    # plt.savefig(f'EDA/plots results/categorical/box_plot/{column}.png', bbox_inches='tight')
+    # plt.show()
+    plt.savefig(f'EDA/plots results/categorical/box_plot/{column}.png', bbox_inches='tight')
     plt.clf()
 
 
@@ -276,114 +274,3 @@ plt.tight_layout()
 # plt.show()
 plt.savefig(f'EDA/plots results/continuous/heatmap.png', bbox_inches='tight')
 plt.clf()
-
-
-# %% NHÁPPPPPPPPPPPPPPPPPP
-# %% NHÁPPPPPPPPPPPPPPPPPP
-# %% NHÁPPPPPPPPPPPPPPPPPP
-# %% NHÁPPPPPPPPPPPPPPPPPP
-# df['used_price'] = df['used_price'].apply(preprocess_used_price)
-df['storage'] = df['storage'].apply(preprocess_storage)
-column = 'storage'
-plt.figure()
-factor = df[column].nunique()
-plt.figure(figsize=(1.5 + factor * 0.35, 4.5))
-
-# Tạo group rồi sort theo median trước khi vẽ
-grouped = df[[column, 'used_price']].groupby([column])
-df2 = pd.DataFrame({col: vals['used_price'] for col, vals in grouped})
-meds = df2.median()
-meds.sort_values(ascending=True, inplace=True)
-df2 = df2[meds.index]
-ax = sns.boxplot(data=df2)
-
-# Bỏ viền xung quanh
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Size của x y ticks
-plt.xticks(fontsize=10.65)
-plt.yticks(fontsize=10.65)
-# Size của x y labels
-axes = plt.gca()
-axes.xaxis.label.set_size(10.65)
-axes.yaxis.label.set_size(10.65)
-
-# Kích thước mỗi bar
-change_width(ax, 0.7)
-
-# Vẽ ticks của trục y
-__ = ax.set_xticklabels(ax.get_xticklabels(), rotation=60)
-# Custom ticks của trục y
-labels = [str(int(item / 1e6)) + ' tr' for item in ax.get_yticks()]
-__ = ax.set_yticklabels(labels)
-
-# Tính ANOVA nhằm kiểm tra xem có sự khác nhau giữa các nhóm hay không
-model = ols(f'used_price ~ {column}', data=df).fit()
-aov = sm.stats.anova_lm(model, typ=2)
-p_value = aov['PR(>F)'][f'{column}']
-
-
-# Tiêu đề
-ax = plt.title(f'used_price vs {column}\n(p_value one-way ANOVA: {p_value:.2e})')
-
-plt.tight_layout()
-plt.show()
-# plt.savefig(f'EDA/plots results/categorical/box_plot/{column}.png', bbox_inches='tight')
-plt.clf()
-
-#%%
-
-    for j in range(len(quali_cols)):
-        if quali_cols[i] ==
-        plt.figure(figsize=(7, 7))
-
-        # Tính p-value cho tương tác của 2 biến. p < 0.05 => có ý nghĩa thống kê => có tương tác giữa 2 biến
-        model = ols(f'used_price ~ {quali_cols[i]} + {quali_cols[j]} + {quali_cols[i]}:{quali_cols[j]}',
-                    data=df).fit()
-        aov = sm.stats.anova_lm(model, typ=2)
-        p_value = aov['PR(>F)'][f'{quali_cols[i]}:{quali_cols[j]}']
-
-        # Vẽ interaction plot
-        interaction_plot(x=quali_df[quali_cols[i]], trace=quali_df[quali_cols[j]], response=df['used_price'])
-
-        # Size của plot
-
-        fig = plt.gcf()
-        fig.set_size_inches(9, 7)
-
-        # Size của legend
-        plt.legend(fontsize=12)
-
-        plt.xticks(fontsize=15)
-        plt.yticks(fontsize=15)
-        axes = plt.gca()
-
-        # Size của x y labels
-        axes.xaxis.label.set_size(15)
-        axes.yaxis.label.set_size(15)
-
-        # Bỏ viền xung quanh
-        ax = plt.subplot(111)
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.spines['bottom'].set_visible(False)
-        ax.spines['left'].set_visible(False)
-
-        # Vẽ ticks của trục x
-        __ = ax.set_xticklabels(ax.get_xticklabels(), rotation=60)
-        labels = [str(int(item / 1e6)) + ' tr' for item in ax.get_yticks()]
-        # Custom ticks của trục y
-        __ = ax.set_yticklabels(labels)
-
-        ___ = plt.title(f'used_price vs {quali_cols[i]}:{quali_cols[j]}\n(p_value two-way ANOVA: {p_value:.2e})',
-                        fontdict={'size': 15})
-        plt.tight_layout()
-        plt.show()
-        # break
-        # plt.savefig(f'EDA/plots results/categorical/interactions/{quali_cols[i]} vs {quali_cols[j]}.png',
-        #             bbox_inches='tight')
-        plt.clf()
-    # break
