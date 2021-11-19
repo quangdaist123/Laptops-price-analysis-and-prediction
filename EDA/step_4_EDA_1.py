@@ -2,7 +2,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import f_oneway
-from statsmodels.graphics.factorplots import interaction_plot
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from Preprocessing.utils.utils_step_1 import correct_dtypes

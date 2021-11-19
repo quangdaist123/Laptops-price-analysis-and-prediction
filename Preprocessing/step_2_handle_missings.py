@@ -82,7 +82,7 @@ fill_missing(66, 'released', '2015')
 fill_missing(69, 'released', 2015)
 
 # Apple Macbook Pro 2019 Touch i7 2.6GHz/16GB/256GB/ Radeon 555X (MV902SA/A)
-fill_missing(70, 'gpu_type', 'i7')
+fill_missing(70, 'gpu_type', 'Radeon')
 fill_missing(70, 'released', 2019)
 
 # Apple Macbook Pro MPXQ2SA/A i5 2.3GHz/8GB/128GB (2017)
