@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 from statsmodels.graphics.factorplots import interaction_plot
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
-
 import warnings
+
+plt.rcParams["font.family"] = "Times New Roman"
 
 from Preprocessing.utils.utils_step_1 import correct_dtypes
 
@@ -48,7 +49,7 @@ for i in range(len(quali_cols)):
         p_value = aov['PR(>F)'][f'{quali_cols[i]}:{quali_cols[j]}']
 
         # Vẽ interaction plot
-        interaction_plot(x=quali_df[quali_cols[i]], trace=quali_df[quali_cols[j]], response=df['used_price'])
+        interaction_plot(x=quali_df[quali_cols[i]], trace=quali_df[quali_cols[j]], response=df['used_price'], plottype='both', ms=17)
 
         # Size của plot
 
@@ -56,15 +57,15 @@ for i in range(len(quali_cols)):
         fig.set_size_inches(9, 7)
 
         # Size của legend
-        plt.legend(fontsize=12)
+        plt.legend(fontsize=17)
 
-        plt.xticks(fontsize=15)
-        plt.yticks(fontsize=15)
+        plt.xticks(fontsize=20)
+        plt.yticks(fontsize=20)
         axes = plt.gca()
 
         # Size của x y labels
-        axes.xaxis.label.set_size(15)
-        axes.yaxis.label.set_size(15)
+        axes.xaxis.label.set_size(20)
+        axes.yaxis.label.set_size(20)
 
         # Bỏ viền xung quanh
         ax = plt.subplot(111)
@@ -80,11 +81,12 @@ for i in range(len(quali_cols)):
         __ = ax.set_yticklabels(labels)
 
         ___ = plt.title(f'used_price vs {quali_cols[i]}:{quali_cols[j]}\n(p_value two-way ANOVA: {p_value:.2e})',
-                        fontdict={'size': 15})
+                        fontdict={'size': 20})
         plt.tight_layout()
         # plt.show()
         # break
         plt.savefig(f'EDA/plots results/categorical/interactions/{quali_cols[i]} vs {quali_cols[j]}.png',
-                    bbox_inches='tight')
+                    bbox_inches='tight', dpi=250)
         plt.clf()
+
     # break

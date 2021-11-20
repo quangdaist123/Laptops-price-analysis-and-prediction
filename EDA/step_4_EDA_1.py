@@ -5,6 +5,7 @@ from scipy.stats import f_oneway
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from Preprocessing.utils.utils_step_1 import correct_dtypes
+plt.rcParams["font.family"] = "Times New Roman"
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -50,12 +51,12 @@ for column in quali_cols:
     ax = sns.barplot(x=temp.index, y=temp, order=temp.index)
 
     # Size của x y ticks
-    plt.xticks(fontsize=10.65)
-    plt.yticks(fontsize=10.65)
+    plt.xticks(fontsize=15.65)
+    plt.yticks(fontsize=15.65)
     # Size của x y labels
     axes = plt.gca()
-    axes.xaxis.label.set_size(10.65)
-    axes.yaxis.label.set_size(10.65)
+    axes.xaxis.label.set_size(15.65)
+    axes.yaxis.label.set_size(15.65)
 
     # Bỏ viền xung quanh
     ax.spines['top'].set_visible(False)
@@ -72,17 +73,17 @@ for column in quali_cols:
         percentage = '{:.1f}%'.format(100 * p.get_height() / total)
         x = p.get_x() + p.get_width() / 2 - 0.33
         y = p.get_y() + p.get_height() + 0.5
-        _ = ax.annotate(percentage, (x, y), size=10.65)
+        _ = ax.annotate(percentage, (x, y), size=15.65)
 
     # Xoay x ticks
     __ = ax.set_xticklabels(ax.get_xticklabels(), rotation=60)
 
     # Tiêu đề
-    plt.title(f'{column}')
+    plt.title(f'{column}', fontsize=15.65)
 
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f'EDA/plots results/categorical/bar_plot/{column}.png', bbox_inches='tight')
+    plt.savefig(f'EDA/plots results/categorical/bar_plot/{column}.png', bbox_inches='tight', dpi=250)
     plt.clf()
     # break
 
@@ -104,19 +105,19 @@ for column in quanti_cols:
     __ = plt.xlabel(column)
 
     # Size của x y ticks
-    plt.xticks(fontsize=10.65)
-    plt.yticks(fontsize=10.65)
+    plt.xticks(fontsize=15.65)
+    plt.yticks(fontsize=15.65)
     # Size của x y labels
     axes = plt.gca()
-    axes.xaxis.label.set_size(10.65)
-    axes.yaxis.label.set_size(10.65)
+    axes.xaxis.label.set_size(15.65)
+    axes.yaxis.label.set_size(15.65)
 
     # Tiêu đề
-    plt.title(f'{column}')
+    plt.title(f'{column}', fontsize=15.65)
 
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f'EDA/plots results/continuous/distribution_plot/{column}.png', bbox_inches='tight')
+    plt.savefig(f'EDA/plots results/continuous/distribution_plot/{column}.png', bbox_inches='tight', dpi=250)
     plt.clf()
 
 # %%
@@ -131,7 +132,7 @@ for column in quali_df:
 
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f'EDA/plots results/categorical/pie_chart/{column}.png', bbox_inches='tight')
+    plt.savefig(f'EDA/plots results/categorical/pie_chart/{column}.png', bbox_inches='tight', dpi=250)
     plt.clf()
 
 # %% md
@@ -139,6 +140,7 @@ for column in quali_df:
 # TƯƠNG QUAN (ĐƠN BIẾN)
 
 # %% Box plot (Biến rời rạc)
+
 cate_p_value = pd.DataFrame({'feature': [], 'p_value': []})
 
 for column in quali_cols:
@@ -164,12 +166,12 @@ for column in quali_cols:
     ax.spines['left'].set_visible(False)
 
     # Size của x y ticks
-    plt.xticks(fontsize=10.65)
-    plt.yticks(fontsize=10.65)
+    plt.xticks(fontsize=15.65)
+    plt.yticks(fontsize=15.65)
     # Size của x y labels
     axes = plt.gca()
-    axes.xaxis.label.set_size(10.65)
-    axes.yaxis.label.set_size(10.65)
+    axes.xaxis.label.set_size(15.65)
+    axes.yaxis.label.set_size(15.65)
 
     # Kích thước mỗi bar
     change_width(ax, 0.7)
@@ -187,35 +189,37 @@ for column in quali_cols:
     cate_p_value = cate_p_value.append({'feature': column, 'p_value': p_value}, ignore_index=True)
 
     # Tiêu đề
-    ax = plt.title(f'used_price vs {column}\n(p_value one-way ANOVA: {p_value:.2e})')
+    ax = plt.title(f'used_price vs {column}\n(p_value: {p_value:.2e})', fontsize=15.65)
 
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f'EDA/plots results/categorical/box_plot/{column}.png', bbox_inches='tight')
+    # break
+    plt.savefig(f'EDA/plots results/categorical/box_plot/{column}_higher_resolution.png', bbox_inches='tight', dpi=250)
     plt.clf()
+
 
 
 # %% one-way ANOVA
 
-def do_anova_on(df):
-    """
-    :param df:
-    :return: Pandas series of p_values for categorical features versus dependent feature
-    """
-
-    quali_cols = df.select_dtypes(include='object').columns
-    p_values = {}
-    for index, feature in enumerate(quali_cols):
-        grouped = df.groupby(quali_cols[index])
-        keys = list(grouped.groups.keys())
-        anova_result = f_oneway(*[grouped.get_group(key)["used_price"] for key in keys])
-        p_values[feature] = anova_result.pvalue
-    return pd.Series(do_anova_on(df))
-
-
-p_values_series = do_anova_on(df)
-lowest_p_values_columns = p_values_series[p_values_series < 0.0000000001].index
-p_values_series.apply(lambda x: "{:.3f}".format(float(x))).sort_values()
+# def do_anova_on(df):
+#     """
+#     :param df:
+#     :return: Pandas series of p_values for categorical features versus dependent feature
+#     """
+#
+#     quali_cols = df.select_dtypes(include='object').columns
+#     p_values = {}
+#     for index, feature in enumerate(quali_cols):
+#         grouped = df.groupby(quali_cols[index])
+#         keys = list(grouped.groups.keys())
+#         anova_result = f_oneway(*[grouped.get_group(key)["used_price"] for key in keys])
+#         p_values[feature] = anova_result.pvalue
+#     return pd.Series(do_anova_on(df))
+#
+#
+# p_values_series = do_anova_on(df)
+# lowest_p_values_columns = p_values_series[p_values_series < 0.0000000001].index
+# p_values_series.apply(lambda x: "{:.3f}".format(float(x))).sort_values()
 
 # %% Biến liên tục
 #### %% Regression plot
@@ -237,26 +241,26 @@ for column in quanti_cols:
     __ = ax.set_yticklabels(labels)
 
     # Size của x y ticks
-    plt.xticks(fontsize=10.65)
-    plt.yticks(fontsize=10.65)
+    plt.xticks(fontsize=15.65)
+    plt.yticks(fontsize=15.65)
     # Size của x y labels
     axes = plt.gca()
-    axes.xaxis.label.set_size(10.65)
-    axes.yaxis.label.set_size(10.65)
+    axes.xaxis.label.set_size(15.65)
+    axes.yaxis.label.set_size(15.65)
 
     # Tiêu đề
-    plt.title(f'used_price vs {column}')
+    plt.title(f'used_price vs {column}', fontsize=15.65)
 
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f'EDA/plots results/continuous/regression_plot/{column}.png', bbox_inches='tight')
+    plt.savefig(f'EDA/plots results/continuous/regression_plot/{column}.png', bbox_inches='tight', dpi=250)
     plt.clf()
 
 # %% Heat map
 corr_matrix = df[quanti_cols].corr()
 
 plt.figure(figsize=(5, 5))
-_ = plt.title('Correlation Heatmap of Quantitatve features with Target')
+_ = plt.title('Correlation Heatmap of Quantitatve features with Target', fontsize=15.65)
 ax = sns.heatmap(corr_matrix, square=True, annot=True, fmt='.2f', linecolor='black', cbar=False)
 
 # Bỏ viền xung quanh
@@ -271,5 +275,5 @@ _ = ax.set_yticklabels(ax.get_yticklabels(), rotation=30)
 
 plt.tight_layout()
 # plt.show()
-plt.savefig(f'EDA/plots results/continuous/heatmap.png', bbox_inches='tight')
+plt.savefig(f'EDA/plots results/continuous/heatmap.png', bbox_inches='tight', dpi=250)
 plt.clf()
