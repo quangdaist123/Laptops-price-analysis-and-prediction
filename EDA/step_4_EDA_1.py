@@ -16,7 +16,7 @@ pd.options.display.max_rows
 # %%
 
 df = pd.read_csv('Dataset/Tidy/4_dataset_reprocessed.csv')
-df = correct_dtypes(df, after_step='5')
+df = correct_dtypes(df, after_step='1')
 quanti_cols = df.select_dtypes(include='number').columns
 quali_df = df.select_dtypes(include='object')
 quali_cols = quali_df.columns
@@ -52,6 +52,7 @@ for column in quali_cols:
 
     # Size của x y ticks
     plt.xticks(fontsize=15.65)
+    plt.ylabel("count")
     plt.yticks(fontsize=15.65)
     # Size của x y labels
     axes = plt.gca()
@@ -124,11 +125,11 @@ for column in quanti_cols:
 # Pie chart
 for column in quali_df:
     plt.figure()
-    fig, ax = plt.subplots(figsize=(5, 5))
+    fig, ax = plt.subplots(figsize=(4, 4))
     labels = df[column].value_counts().keys()
     _ = plt.pie(x=df[column].value_counts(), autopct="%.1f%%", explode=[0.02] * len(df[column].value_counts()),
-                labels=labels, pctdistance=0.75, textprops={'fontsize': 11})
-    _ = plt.title(column, fontsize=11);
+                labels=labels, pctdistance=0.75, textprops={'fontsize': 15})
+    _ = plt.title(column, fontsize=15);
 
     plt.tight_layout()
     # plt.show()
@@ -194,7 +195,7 @@ for column in quali_cols:
     plt.tight_layout()
     # plt.show()
     # break
-    plt.savefig(f'EDA/plots results/categorical/box_plot/{column}_higher_resolution.png', bbox_inches='tight', dpi=250)
+    plt.savefig(f'EDA/plots results/categorical/box_plot/{column}.png', bbox_inches='tight', dpi=250)
     plt.clf()
 
 

@@ -21,10 +21,7 @@ pd.options.display.max_rows
 
 # In[3]:
 df = pd.read_csv('Dataset/Tidy/4_dataset_reprocessed.csv')
-df = correct_dtypes(df, after_step='5')
-
-# dropna
-df.dropna(inplace=True)
+df = correct_dtypes(df, af0ter_step='1')
 
 quanti_cols = df.select_dtypes(include='number').columns
 quali_df = df.select_dtypes(include='object')
@@ -37,9 +34,10 @@ for i in range(len(quali_cols)):
     for j in range(len(quali_cols)):
         if i == j:
             continue
-
         # convert all values to string to fix x_tick not recognize
-        quali_df[quali_cols[i]] = quali_df[quali_cols[i]].apply(lambda x: str(x))
+        df_temp = quali_df.dropna(subset=[quali_cols[i], quali_cols[j]])
+
+        df_temp[quali_cols[i]] = df_temp[quali_cols[i]].apply(lambda x: str(x))
 
         plt.figure(figsize=(7, 7))
         # Tính p-value cho tương tác của 2 biến. p < 0.05 => có ý nghĩa thống kê => có tương tác giữa 2 biến
@@ -49,7 +47,7 @@ for i in range(len(quali_cols)):
         p_value = aov['PR(>F)'][f'{quali_cols[i]}:{quali_cols[j]}']
 
         # Vẽ interaction plot
-        interaction_plot(x=quali_df[quali_cols[i]], trace=quali_df[quali_cols[j]], response=df['used_price'], plottype='both', ms=17)
+        interaction_plot(x=df_temp[quali_cols[i]], trace=df_temp[quali_cols[j]], response=df['used_price'], plottype='both', ms=17)
 
         # Size của plot
 
@@ -80,7 +78,7 @@ for i in range(len(quali_cols)):
         # Custom ticks của trục y
         __ = ax.set_yticklabels(labels)
 
-        ___ = plt.title(f'used_price vs {quali_cols[i]}:{quali_cols[j]}\n(p_value two-way ANOVA: {p_value:.2e})',
+        ___ = plt.title(f'used_price vs {quali_cols[i]}:{quali_cols[j]}\n(p_value: {p_value:.2e})',
                         fontdict={'size': 20})
         plt.tight_layout()
         # plt.show()
@@ -88,5 +86,10 @@ for i in range(len(quali_cols)):
         plt.savefig(f'EDA/plots results/categorical/interactions/{quali_cols[i]} vs {quali_cols[j]}.png',
                     bbox_inches='tight', dpi=250)
         plt.clf()
-
     # break
+
+#%%
+plt.figure()
+interaction_plot(x=quali_df['cpu_speed'].astype('category'), trace=quali_df[quali_cols[j]], response=df['used_price'], plottype='both', ms=17)
+plt.show()
+plt.clf()
