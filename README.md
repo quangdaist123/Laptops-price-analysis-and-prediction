@@ -9,7 +9,7 @@ Các công việc chính được thực hiện:
 1. Xây dựng mô hình dự đoán giá
 1. Đánh giá mô hình
 
-Bộ dữ liệu trong đồ án này được nh lấy trên trang bán hàng online của Thế Giới Di Động (https://thegioididong.com) với công cụ hỗ trợ thu thập là Selenium. Thời gian thu thập bắt đầu vào lúc 11:35, 28/10/2021 và quá trình thu thập kéo dài xấp xỉ 45 phút. Kết quả thu được là bộ dữ liệu về các laptop đã qua sử dụng, với 1234 dòng và 35 cột.
+Bộ dữ liệu trong đồ án này được nh lấy trên trang bán hàng online của Thế Giới Di Động (https://thegioididong.com) với công cụ hỗ trợ thu thập là Selenium. Thời gian thu thập bắt đầu vào lúc 11:35, 28/10/2021 và quá trình thu thập kéo dài xấp xỉ 45 phút. Kết quả thu được là bộ dữ liệu về các laptop đã qua sử dụng, với 1234 dòng và 35 cột. 
 
 Trong đồ án này, chúng tôi đã tự tiến hành thu thập bộ dữ liệu trên trang thegioididong.com. Ở bước tiếp theo, cũng là bước tiêu tốn nhiều thời gian nhất, chúng tôi lặp lại quá trình tiền xử lí nhiều lần để xử lí những trường hợp ngoại lệ tồn tại sẵn trong bộ dữ liệu lẫn trong các code của chính nhóm. Sau đó, áp dụng các kĩ thuật phân tích thăm dò, phân tích thống kê, các thuộc tính quan trọng được phát hiện bao gồm : brand, material, cpu_type, gpu_type, ram, has_touchscreen, weight, ppi. Cuối cùng, nhóm em thử nghiệm nhiều loại mô hình hồi quy khác nhau, và thu được mô hình tốt nhất là mô hình hồi quy đa thức bậc 5 Ridge Regression với r2 trên test là 0.775. Sản phẩm được triển khai trên nền tảng đám mây Heroku.
 
