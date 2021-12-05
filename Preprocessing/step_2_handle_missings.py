@@ -1,48 +1,114 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+from Preprocessing.utils import ordered_columns_step_2
 
-from Preprocessing.utils.utils_step_1 import ordered_columns
+plt.rcParams["font.family"] = "Times New Roman"
 
 # %%
 df = pd.read_csv('Dataset/Tidy/1_dataset_renamed_preprocessed_dropped.csv')
 
 # %% Column
-# Tỉ lệ missing
-labels = df.columns
-na_values = df.isna().sum().values
-not_na_values = df.shape[0] - df.isna().sum().values
-
-# width = 0.35  # the width of the bars: can also be len(x) sequence
-# fig, ax = plt.subplots(figsize=(15, 10))
-#
-# ax.bar(labels, na_values, width, label='NA')
-# ax.bar(labels, not_na_values, width, bottom=na_values,
-#        label='Not NA')
-#
-# ax.set_ylabel('Số lượng')
-# ax.set_title('Số lượng NA và Not NA')
-# ax.legend()
-#
-# _ = plt.xticks(rotation=75)
-# plt.savefig('missing.png')
-# plt.show()
-# %%
 
 # Xuất file csv
 missing_percentage = (100 * df.isna().sum() / df.shape[0])
-missing_percentage.sort_values(ascending=False).to_csv('Preprocessing/utils/1_1_missing_percentage.csv')
+missing_percentage.sort_values(ascending=False, inplace=True)
+# missing_percentage.to_csv('Preprocessing/utils/1_1_missing_percentage.csv')
+
+# Visualize
+missing_percentage_greater_than_5 = missing_percentage[missing_percentage > 5]
+
+df_temp = df[missing_percentage_greater_than_5.index]
+df_temp
+labels = df_temp.columns
+na_values = df_temp.isna().sum().values
+not_na_values = df_temp.shape[0] - df_temp.isna().sum().values
+
+width = 0.60  # the width of the bars: can also be len(x) sequence
+fig, ax = plt.subplots(figsize=(4.5, 3))
+
+ax.bar(labels, na_values, width, label='NA')
+# ax.bar(labels, not_na_values, width, bottom=na_values,
+#        label='Not NA')
+
+ax.set_ylabel('Số lượng')
+ax.set_title('Các cột có tỉ lệ missing trên 5%')
+
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.spines['bottom'].set_visible(False)
+ax.spines['left'].set_visible(False)
+
+# Chú thích cho từng cột
+total = len(df_temp)
+for i, p in enumerate(ax.patches):
+    if i > 9:
+        continue
+    percentage = '{:.1f}%'.format(100 * p.get_height() / total)
+    x = p.get_x() + p.get_width() / 2 - 0.47
+    y = p.get_y() + p.get_height() + 0.5
+    _ = ax.annotate(percentage, (x, y), size=10)
+
+# Size của x y ticks
+plt.xticks(fontsize=13)
+plt.ylabel("count")
+plt.yticks(fontsize=13)
+# Size của x y labels
+axes = plt.gca()
+axes.xaxis.label.set_size(13)
+axes.yaxis.label.set_size(13)
+
+plt.tight_layout()
+_ = plt.xticks(rotation=70)
+
+plt.savefig('missing.png', bbox_inches='tight', dpi=250)
+
+
+# plt.show()
+
+
+# %%
+def preprocess_has_touchscreen(string_in):
+    """
+    Trích ra giá trị phân biệt giữa
+    laptop có hỗ trợ cảm ứng (1) và laptop không có hỗ trợ cảm ứng (0)
+    """
+    if string_in is None or str(string_in) == "nan":
+        return 0
+    else:
+        return 1
+
+
+def preprocess_sd_slot(string_in):
+    """
+    Trích ra số lượng các loại khe cảm thẻ nhớ được hỗ trợ
+    """
+
+    if string_in is None or str(string_in) == "nan":
+        return 0
+    else:
+        return len(string_in.split('\n'))
+
+
+df['has_touchscreen'] = df['has_touchscreen'].apply(preprocess_has_touchscreen)
+df['num_sd_slot'] = df['sd_slot'].apply(preprocess_sd_slot)
+df.drop(columns=['sd_slot'], inplace=True)
+
 # %%
 # Loại bỏ những cột có tỉ lệ missing values trên 35%
-missing_percentage = missing_percentage.apply(lambda percent: True if percent < 35 else np.nan)
+
+# Xuất file csv
+missing_percentage = (100 * df.isna().sum() / df.shape[0])
+missing_percentage = missing_percentage.apply(lambda percent: True if percent <= 5 else np.nan)
 non_missing = missing_percentage.dropna()
 selected_columns = list(non_missing.index)
 
 # Sắp xếp lại thứ tự các cột
 selected_columns_ordered = []
-for column in ordered_columns:
+for column in ordered_columns_step_2:
     if column in selected_columns:
         selected_columns_ordered.append(column)
-
+# %%
 df = df[selected_columns_ordered]
 
 

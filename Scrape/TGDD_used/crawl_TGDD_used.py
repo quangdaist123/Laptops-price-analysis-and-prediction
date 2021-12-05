@@ -23,9 +23,7 @@ class TGDD_Scraper(BaseScraper):
             try:
                 self._wait_to_be_clickable(".products > li")
 
-                result = {}
-                result['Tên'] = name
-                result["Giá máy cũ"] = product.find_element_by_css_selector("div:nth-child(2)").text
+                result = {'Tên': name, "Giá máy cũ": product.find_element_by_css_selector("div:nth-child(2)").text}
 
                 # Trích tiết kiệm
                 discount = product.find_elements_by_css_selector('li > label:nth-child(3) > span')
@@ -55,8 +53,7 @@ class TGDD_Scraper(BaseScraper):
 
         # Lấy giá máy mới
         new_price = self.driver.find_elements_by_css_selector('.box-price-present')
-        base_info = {}
-        base_info["Giá máy mới"] = new_price[0].text if new_price else ''
+        base_info = {"Giá máy mới": new_price[0].text if new_price else ''}
 
         # Lấy bảo hành của máy mới
         try:
@@ -153,6 +150,6 @@ df.to_csv("raw_data_TGDD_all_used.csv", index=False)
 
 # Lấy trung bình giá cũ của các máy cùng loại
 df = pd.read_csv("Dataset/Raw/raw_data_TGDD_used_renamed.csv")
-df_take_first_occurence = df.groupby("name")[df.columns].first()
+df_take_first_occurence = df.groupby("name")[df.COLUMNS].first()
 
 df.to_csv("raw_data_TGDD_used.csv", index=False)

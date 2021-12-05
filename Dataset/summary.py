@@ -13,6 +13,6 @@ for filename in onlyfiles:
 
     print("Dataset: ", filename)
     # print(f"Số dòng: {len(df)}, Số cột: {len(df.columns)}")
-    print(f"{len(df)} dòng, {len(df.columns)} cột")
+    print(f"{len(df)} dòng, {len(df.COLUMNS)} cột")
 
 # 

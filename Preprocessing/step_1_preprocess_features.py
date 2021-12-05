@@ -1,11 +1,11 @@
 import pandas as pd
-from Preprocessing.utils.utils_step_1 import *
+import math
+from Preprocessing.utils import *
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
 pd.set_option('display.max_colwidth', -1)
-
 
 df = pd.read_csv("Dataset/Raw/raw_data_TGDD_used.csv")
 # Rename columns
@@ -13,7 +13,7 @@ df = rename_columns(df, alternative_name=alternative_names)
 # Keep the first used laptop if there are many similar laptops
 df = remove_duplicate_laptops(df)
 
-# %%
+# %% CLEANSING
 # Preprocess features
 df["brand"] = df["name"].apply(preprocess_name)
 df["used_price"] = df["used_price"].apply(preprocess_used_price)
@@ -41,7 +41,7 @@ df['has_touchscreen'] = df['has_touchscreen'].apply(preprocess_has_touchscreen)
 df['screen_size'] = df['screen_size'].apply(preprocess_screen_size)
 df["webcam"] = df["webcam"].apply(preprocess_webcam)
 df["battery"] = df["battery"].apply(preprocess_battery)
-df['num_sd_slot'] = df['sd_slot'].apply(preprocess_sd_slot)
+df['sd_slot'] = df['sd_slot'].apply(preprocess_sd_slot)
 df['scan_frequency'] = df['scan_frequency'].apply(preprocess_scan_frequency)
 
 #### Tách thuộc tính wireless
@@ -64,14 +64,40 @@ df['has_camera_lock'] = df['others'].apply(lambda s: preprocess_others(s)[1])
 df['has_180_degree'] = df['others'].apply(lambda s: preprocess_others(s)[2])
 df['has_face_id'] = df['others'].apply(lambda s: preprocess_others(s)[3])
 
-
 # %%
 # Drop unused columns
-old_columns = ["name", "wireless", "size_weight", "ports", "screen_tech", "savings", "sd_slot", 'others']
+old_columns = ["name", "wireless", "size_weight", "ports", "screen_tech", "savings", 'others']
 df.drop(columns=old_columns, inplace=True)
 
 # Reoder columns
 df = df[ordered_columns]
 
+
+# %% TRANSFORMING
+def make_ppi(row):
+    """
+    Tạo thuộc tính PPI từ thuộc tính 'resolution' và 'screen_size'
+    """
+    length_width = re.findall("\\d*\\.?,?\\d+", row['resolution'])
+
+    ppi = math.sqrt(pow(int(length_width[0]), 2) + pow(int(length_width[1]), 2)) / row['screen_size']
+
+    # Mỗi 'row' là một hàng trong dataframe nên mình sẽ sử dụng 2 thuộc tính của nó
+    if str(row['resolution']) == "nan" or str(row['screen_size']) == "nan":
+        return np.nan
+    else:
+        return ppi
+    # return chỉ số PPI
+
+df['ppi'] = df.apply(lambda s: make_ppi(s), axis=1)
 # %%
 df.to_csv("Dataset/Tidy/1_dataset_renamed_preprocessed_dropped.csv", index=False)
+
+# # %% Search for more insights
+# for i, row in df.iterrows():
+#     if str(row['gpu_type']) != 'nan':
+#         if (preprocess_cpu_type(row['cpu_type'])) == "i7" and\
+#                 preprocess_used_price(row['used_price']) > 35000000:
+#             print(row['name'])
+#             print(row['cpu_type'])
+#             print(row['used_price'])

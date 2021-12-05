@@ -1,14 +1,14 @@
 import numpy as np
 import pandas as pd
-from Preprocessing.utils.utils_step_1 import correct_dtypes, alternative_names, rename_columns, remove_duplicate_laptops
+from Preprocessing.utils import correct_dtypes, alternative_names, rename_columns, remove_duplicate_laptops
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
 pd.set_option('display.max_colwidth', -1)
 
-df = pd.read_csv('Dataset/Tidy/3_dataset_feature_added.csv')
-df = correct_dtypes(df, after_step='1')
+df = pd.read_csv('Dataset/Tidy/2_dataset_missings_filtered.csv')
+df = correct_dtypes(df)
 
 
 # %% Biến đổi + gom nhóm các thuộc tính
@@ -18,15 +18,22 @@ def reprocess_storage(string_in):
     """
         Trích ra dung lượng ổ cứng
     """
+    # Kiểm tra giá trị trong ô trước khi bắt đầu xử lí
+    if string_in is None or str(string_in) == "nan":
+        return np.nan
 
     common_drive_capacity = ["HDD 1 TB", "128 GB", "256 GB", "512 GB", "1 TB"]
     new_drive = np.nan
+
     if string_in is not None and str(string_in) != "nan":
         drive_tight_uppercased = string_in.upper()
         for capacity in common_drive_capacity:
             if capacity in drive_tight_uppercased:
                 new_drive = capacity
                 break
+
+    if "HDD SATA (nâng cấp tối đa 2TB) 1 TB" in string_in:
+        return "HDD 1 TB"
     return new_drive
 
 
@@ -89,14 +96,16 @@ def reprocess_resolution(string_in):
 
 
 # %% check
-# use raw 'material' and '' column
+# use raw 'material' and 'storage' column
 df_raw = pd.read_csv('Dataset/Raw/raw_data_TGDD_used.csv')
 df_raw = rename_columns(df_raw, alternative_name=alternative_names)
 df_raw = remove_duplicate_laptops(df_raw)
 df['material'] = df_raw['material'].apply(reprocess_material)
 df['storage'] = df_raw['storage'].apply(reprocess_storage)
 
-df['has_sd_slot'] = df['num_sd_slot'].apply(reprocess_num_sd_slot)
+# df['has_sd_slot'] = df['num_sd_slot'].apply(reprocess_num_sd_slot)
+# df.drop('num_sd_slot', axis=1, inplace=True)
+
 df['screen_size'] = df['screen_size'].apply(reprocess_screen_size)
 df['resolution'] = df['resolution'].apply(reprocess_resolution)
 
@@ -127,10 +136,9 @@ def bin_column(column, num_bin):
 
 
 # %%
-# Test thử hàm nè
 df['cpu_speed'] = bin_column(df['cpu_speed'], 3)
 df['max_cpu_speed'] = bin_column(df['max_cpu_speed'], 3)
 
 # %%
 
-df.to_csv("Dataset/Tidy/4_dataset_reprocessed.csv", index=False)
+df.to_csv("Dataset/Tidy/3_dataset_reprocessed.csv", index=False)

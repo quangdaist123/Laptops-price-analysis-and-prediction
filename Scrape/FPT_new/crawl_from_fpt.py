@@ -4,16 +4,11 @@
 # In[8]:
 
 
-from base_class import BaseScraper
-import time
-import json
 import pandas as pd
-from selenium import webdriver
-from selenium.webdriver import ChromeOptions
+from Scrape.utils.base_class import BaseScraper
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 # In[30]:

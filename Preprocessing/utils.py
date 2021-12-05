@@ -43,8 +43,17 @@ alternative_names = \
 ordered_columns = \
     ['brand', 'cpu_type', 'cpu_speed', 'max_cpu_speed', 'num_core', 'num_thread', 'cached_cpu',
      'gpu_type', 'ram_type', 'ram', 'max_ram', 'ram_speed', 'storage',
-     'screen_size', 'resolution', 'scan_frequency', 'webcam', 'num_sd_slot', 'material', 'battery', 'os',
+     'screen_size', 'resolution', 'scan_frequency', 'webcam', 'sd_slot', 'material', 'battery', 'os',
      'audio_tech', 'bluetooth_tech', 'wifi_tech', 'weight', 'thickness', 'width', 'length', 'released',
+     'has_lightning', 'has_thundebolt', 'has_touchscreen', 'has_fingerprint', 'has_camera_lock', 'has_180_degree',
+     'has_face_id', 'has_antiglare',
+     'saved_percent', 'saved_money', 'new_warranty', 'used_warranty', 'new_price', 'used_price']
+
+ordered_columns_step_2 = \
+    ['brand', 'cpu_type', 'cpu_speed', 'max_cpu_speed', 'num_core', 'num_thread', 'cached_cpu',
+     'gpu_type', 'ram_type', 'ram', 'max_ram', 'ram_speed', 'storage',
+     'screen_size', 'resolution', 'scan_frequency', 'webcam', 'num_sd_slot', 'material', 'battery', 'os',
+     'audio_tech', 'bluetooth_tech', 'wifi_tech', 'weight', 'thickness', 'width', 'length', 'released', 'ppi',
      'has_lightning', 'has_thundebolt', 'has_touchscreen', 'has_fingerprint', 'has_camera_lock', 'has_180_degree',
      'has_face_id', 'has_antiglare',
      'saved_percent', 'saved_money', 'new_warranty', 'used_warranty', 'new_price', 'used_price']
@@ -69,7 +78,6 @@ def correct_dtypes(df):
     df['ram_speed'] = df['ram_speed'].astype('object')
     df['storage'] = df['storage'].astype('object')
     df['screen_size'] = df['screen_size'].astype('object')
-    df['num_sd_slot'] = df['num_sd_slot'].astype('object')
     df['bluetooth_tech'] = df['bluetooth_tech'].astype('object')
     df['released'] = df['released'].astype('object')
     df['has_lightning'] = df['has_lightning'].astype('object')
@@ -82,6 +90,9 @@ def correct_dtypes(df):
     df['has_antiglare'] = df['has_antiglare'].astype('object')
     df['new_warranty'] = df['new_warranty'].astype('object')
     df['used_warranty'] = df['used_warranty'].astype('object')
+    df['released'] = df['released'].astype('object')
+    df['num_sd_slot'] = df['num_sd_slot'].astype('object')
+
     return df
 
 
@@ -114,15 +125,15 @@ def preprocess_ram_type(string_in):
     Trích ra loại RAM
     """
 
-    types_of_RAM = ["LPDDR3", "DDR3L", "DDR3", "LPDDR4X", "DDR4"]
+    types_of_ram = ["LPDDR3", "DDR3L", "DDR3", "LPDDR4X", "DDR4"]
     ram_new = np.nan
     if string_in is None or str(string_in) == "nan":
         return ram_new
 
     ram_upercased = string_in.upper()
-    for type in types_of_RAM:
-        if type in ram_upercased:
-            ram_new = type
+    for _type in types_of_ram:
+        if _type in ram_upercased:
+            ram_new = _type
             break
     return ram_new
 
@@ -456,9 +467,9 @@ def preprocess_audio_tech(string_in):
         string_in = string_in.replace("High Definition", "Realtek High Definition")
         string_in = string_in.replace("High-definition", "Realtek High Definition")
 
-        for type in auto_tech_types:
-            if type.lower() in string_in.lower():
-                return type
+        for _type in auto_tech_types:
+            if _type.lower() in string_in.lower():
+                return _type
         else:
             string_in = "Other"
     return string_in
@@ -472,7 +483,7 @@ def preprocess_ram_speed(string_in):
         return np.nan
 
     string_in = string_in.lower()
-    bus = re.match(r'\d+\ ?mhz', string_in)
+    bus = re.match(r'\d+ ?mhz', string_in)
     if bus:
         bus = int(bus.group().replace('mhz', ''))
     else:
@@ -598,7 +609,7 @@ def preprocess_max_ram(string_in):
     output = list(map(lambda x: float(x), output))
 
     # Nếu không hổ trợ nâng cấp ram -> np.nan
-    if output == []:
+    if not output:
         return np.nan
     else:
         output = int(output[0])
@@ -661,7 +672,7 @@ def preprocess_savings(string_in):
     """
 
     if string_in is None or str(string_in) == "nan":
-        return (np.nan, np.nan)
+        return np.nan, np.nan
     # Trích số thực
     output = re.findall("\\d*\\.?\\d+\\.?\d+", string_in)
     output = [x.replace(".", "") for x in output]
@@ -684,22 +695,22 @@ def preprocess_has_touchscreen(string_in):
     Trích ra giá trị phân biệt giữa
     laptop có hỗ trợ cảm ứng (1) và laptop không có hỗ trợ cảm ứng (0)
     """
-
-    if string_in is None or str(string_in) == "nan":
-        return 0
-    else:
-        return 1
+    return string_in
+    # if string_in is None or str(string_in) == "nan":
+    #     return 0
+    # else:
+    #     return 1
 
 
 def preprocess_sd_slot(string_in):
     """
     Trích ra số lượng các loại khe cảm thẻ nhớ được hỗ trợ
     """
-
-    if string_in is None or str(string_in) == "nan":
-        return 0
-    else:
-        return len(string_in.split('\n'))
+    return string_in
+    # if string_in is None or str(string_in) == "nan":
+    #     return 0
+    # else:
+    #     return len(string_in.split('\n'))
 
 
 def preprocess_screen_size(string_in):
@@ -741,11 +752,11 @@ def preprocess_others(string_in):
     if '180' in string_in:
         _180deg = 1
 
-    faceID = 0
+    face_id = 0
     if 'khuôn mặt' in string_in:
-        faceID = 1
+        face_id = 1
 
-    return fingerprint, camera_lock, _180deg, faceID
+    return fingerprint, camera_lock, _180deg, face_id
 
 
 def preprocess_scan_frequency(string_in):

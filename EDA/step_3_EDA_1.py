@@ -1,10 +1,10 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.stats import f_oneway
 import statsmodels.api as sm
 from statsmodels.formula.api import ols
-from Preprocessing.utils.utils_step_1 import correct_dtypes
+from Preprocessing.utils import correct_dtypes
+
 plt.rcParams["font.family"] = "Times New Roman"
 
 pd.set_option('display.max_rows', None)
@@ -15,8 +15,8 @@ pd.options.display.max_rows
 
 # %%
 
-df = pd.read_csv('Dataset/Tidy/4_dataset_reprocessed.csv')
-df = correct_dtypes(df, after_step='1')
+df = pd.read_csv('Dataset/Tidy/3_dataset_reprocessed.csv')
+df = correct_dtypes(df)
 quanti_cols = df.select_dtypes(include='number').columns
 quali_df = df.select_dtypes(include='object')
 quali_cols = quali_df.columns
@@ -44,6 +44,10 @@ def change_width(ax, new_value):
 
 
 for column in quali_cols:
+    selected_columns = ['brand', 'max_cpu_speed', 'ram', 'material']
+    if column not in selected_columns:
+        continue
+
     plt.figure()
     factor = df[column].nunique()
     plt.figure(figsize=(1.5 + factor * 0.35, 4.5))
@@ -51,13 +55,13 @@ for column in quali_cols:
     ax = sns.barplot(x=temp.index, y=temp, order=temp.index)
 
     # Size của x y ticks
-    plt.xticks(fontsize=15.65)
+    plt.xticks(fontsize=13.5)
     plt.ylabel("count")
-    plt.yticks(fontsize=15.65)
+    plt.yticks(fontsize=13.5)
     # Size của x y labels
     axes = plt.gca()
-    axes.xaxis.label.set_size(15.65)
-    axes.yaxis.label.set_size(15.65)
+    axes.xaxis.label.set_size(13.5)
+    axes.yaxis.label.set_size(13.5)
 
     # Bỏ viền xung quanh
     ax.spines['top'].set_visible(False)
@@ -74,13 +78,13 @@ for column in quali_cols:
         percentage = '{:.1f}%'.format(100 * p.get_height() / total)
         x = p.get_x() + p.get_width() / 2 - 0.33
         y = p.get_y() + p.get_height() + 0.5
-        _ = ax.annotate(percentage, (x, y), size=15.65)
+        _ = ax.annotate(percentage, (x, y), size=13.5)
 
     # Xoay x ticks
-    __ = ax.set_xticklabels(ax.get_xticklabels(), rotation=60)
+    __ = ax.set_xticklabels(ax.get_xticklabels(), rotation=20)
 
     # Tiêu đề
-    plt.title(f'{column}', fontsize=15.65)
+    plt.title(f'{column}', fontsize=13.5)
 
     plt.tight_layout()
     # plt.show()
@@ -93,8 +97,8 @@ for column in quali_cols:
 # Distribution
 # Biến liên tục
 for column in quanti_cols:
-    if column == 'used_price':
-        continue
+    # if column == 'used_price':
+    #     continue
     plt.figure(figsize=(5, 5))
     ax = sns.distplot(x=df[column])
 
@@ -129,7 +133,7 @@ for column in quali_df:
     labels = df[column].value_counts().keys()
     _ = plt.pie(x=df[column].value_counts(), autopct="%.1f%%", explode=[0.02] * len(df[column].value_counts()),
                 labels=labels, pctdistance=0.75, textprops={'fontsize': 15})
-    _ = plt.title(column, fontsize=15);
+    _ = plt.title(column, fontsize=15)
 
     plt.tight_layout()
     # plt.show()
@@ -137,7 +141,6 @@ for column in quali_df:
     plt.clf()
 
 # %% md
-# HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 # TƯƠNG QUAN (ĐƠN BIẾN)
 
 # %% Box plot (Biến rời rạc)
@@ -148,6 +151,10 @@ for column in quali_cols:
     plt.figure()
     factor = df[column].nunique()
     plt.figure(figsize=(1.5 + factor * 0.35, 4.5))
+
+    selected_columns = ['brand', 'max_cpu_speed', 'ram']
+    if column not in selected_columns:
+        continue
 
     # Tạo group rồi sort theo median trước khi vẽ
     grouped = df[[column, 'used_price']].groupby([column])
@@ -178,7 +185,7 @@ for column in quali_cols:
     change_width(ax, 0.7)
 
     # Vẽ ticks của trục y
-    __ = ax.set_xticklabels(ax.get_xticklabels(), rotation=60)
+    __ = ax.set_xticklabels(ax.get_xticklabels(), rotation=20)
     # Custom ticks của trục y
     labels = [str(int(item / 1e6)) + ' tr' for item in ax.get_yticks()]
     __ = ax.set_yticklabels(labels)
@@ -197,8 +204,6 @@ for column in quali_cols:
     # break
     plt.savefig(f'EDA/plots results/categorical/box_plot/{column}.png', bbox_inches='tight', dpi=250)
     plt.clf()
-
-
 
 # %% one-way ANOVA
 
@@ -221,60 +226,3 @@ for column in quali_cols:
 # p_values_series = do_anova_on(df)
 # lowest_p_values_columns = p_values_series[p_values_series < 0.0000000001].index
 # p_values_series.apply(lambda x: "{:.3f}".format(float(x))).sort_values()
-
-# %% Biến liên tục
-#### %% Regression plot
-
-for column in quanti_cols:
-    if column == 'used_price':
-        continue
-    plt.figure()
-    ax = sns.regplot(x=column, y='used_price', data=df)
-
-    # Bỏ viền xung quanh
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-
-    # Custom ticks của trục y
-    labels = [str(int(item / 1e6)) + ' tr' for item in ax.get_yticks()]
-    __ = ax.set_yticklabels(labels)
-
-    # Size của x y ticks
-    plt.xticks(fontsize=15.65)
-    plt.yticks(fontsize=15.65)
-    # Size của x y labels
-    axes = plt.gca()
-    axes.xaxis.label.set_size(15.65)
-    axes.yaxis.label.set_size(15.65)
-
-    # Tiêu đề
-    plt.title(f'used_price vs {column}', fontsize=15.65)
-
-    plt.tight_layout()
-    # plt.show()
-    plt.savefig(f'EDA/plots results/continuous/regression_plot/{column}.png', bbox_inches='tight', dpi=250)
-    plt.clf()
-
-# %% Heat map
-corr_matrix = df[quanti_cols].corr()
-
-plt.figure(figsize=(5, 5))
-_ = plt.title('Correlation Heatmap of Quantitatve features with Target', fontsize=15.65)
-ax = sns.heatmap(corr_matrix, square=True, annot=True, fmt='.2f', linecolor='black', cbar=False)
-
-# Bỏ viền xung quanh
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
-ax.spines['left'].set_visible(False)
-
-# Vẽ ticks của trục x y
-_ = ax.set_xticklabels(ax.get_xticklabels(), rotation=30)
-_ = ax.set_yticklabels(ax.get_yticklabels(), rotation=30)
-
-plt.tight_layout()
-# plt.show()
-plt.savefig(f'EDA/plots results/continuous/heatmap.png', bbox_inches='tight', dpi=250)
-plt.clf()
