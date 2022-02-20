@@ -1,22 +1,21 @@
-# Phân tích và dự đoán giá laptop trên các website bán hàng ở Việt Nam
+# Laptops price analysis and prediction on Thegioididong.com
 
-Đây là repository được sử dụng để thực hiện đồ án môn học Phân tích và trực quan dữ liệu (DS105).
+This is the final project of the course Data analysis and visualization (DS103). In the project, we collect, preprocess and analyze the the price of second-hand laptops on [thegioididong](https://www.thegioididong.com/may-doi-tra/laptop). We also build a simple model to predict the price of an used laptop based on our deduced important features. The deployment of the model is at https://tgdd-laptop-price-prediction.herokuapp.com/
 
-Các công việc chính được thực hiện:
-1. Thu thập dữ liệu giá laptop cũ trên trang thegioididong.com
-1. Tiền xử lí (Làm sạch, biến đổi dữ liệu)
-1. Phân tích thăm dò
-1. Xây dựng mô hình dự đoán giá
-1. Đánh giá mô hình
+Our main work includes:
+1. Scrape all laptops' features on [thegioididong](https://www.thegioididong.com/may-doi-tra/laptop) (11:35, 28/10/2021).
+2. Data cleansing on the raw dataset
+3. Transforming features based on the original ones
+4. Performing EDA on the tidy dataset
+5. Build a model to predict the second-hand prices
+6. Deploy the model on a cloud platform.
 
-Bộ dữ liệu trong đồ án này được nh lấy trên trang bán hàng online của Thế Giới Di Động (https://thegioididong.com) với công cụ hỗ trợ thu thập là Selenium. Thời gian thu thập bắt đầu vào lúc 11:35, 28/10/2021 và quá trình thu thập kéo dài xấp xỉ 45 phút. Kết quả thu được là bộ dữ liệu về các laptop đã qua sử dụng, với 1234 dòng và 35 cột. 
+Our dataset contains 1234 rows and 35 features. After analyzing, we found that the most important features consists of brand, material, cpu_type, gpu_type, ram, has_touchscreen, weight, ppi. Our best model (Ridge Regression with 5th polonomial degree) achieves R2 score of 0.775 on the test set.
 
-Trong đồ án này, chúng tôi đã tự tiến hành thu thập bộ dữ liệu trên trang thegioididong.com. Ở bước tiếp theo, cũng là bước tiêu tốn nhiều thời gian nhất, chúng tôi lặp lại quá trình tiền xử lí nhiều lần để xử lí những trường hợp ngoại lệ tồn tại sẵn trong bộ dữ liệu lẫn trong các code của chính nhóm. Sau đó, áp dụng các kĩ thuật phân tích thăm dò, phân tích thống kê, các thuộc tính quan trọng được phát hiện bao gồm : brand, material, cpu_type, gpu_type, ram, has_touchscreen, weight, ppi. Cuối cùng, nhóm em thử nghiệm nhiều loại mô hình hồi quy khác nhau, và thu được mô hình tốt nhất là mô hình hồi quy đa thức bậc 5 Ridge Regression với r2 trên test là 0.775. Sản phẩm được triển khai trên nền tảng đám mây Heroku.
-
-
-Bên cạnh việc thu thập laptop cũ tại thegioididong.com, nhóm còn xây dựng script để lấy dữ liệu từ các trang web:
-- dienmayxanh.com (máy mới): 144 dòng, 31 cột
-- tiki.vn (máy mới): 104 dòng, 41 cột
-- fptshop.com.vn (máy mới): 144 dòng, 67 cột
-- gearvn.com (máy mới): 96 dòng, 41 cột
-- fptshop.com.vn (máy cũ): 28 dòng, 69 cột
+## Note
+Beside collecting on thegioididong.com, at first, we have successfully scraped the laptops from some other websites:
+- dienmayxanh.com (new laptops): 144 rows, 31 features
+- tiki.vn (new laptops): 104 rows, 41 features
+- fptshop.com.vn (new laptops): 144 rows, 67 features
+- gearvn.com (new laptops): 96 rows, 41 features
+- fptshop.com.vn (second-hand laptops): 28 rows, 69 features
